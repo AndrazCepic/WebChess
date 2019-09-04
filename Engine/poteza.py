@@ -1,14 +1,24 @@
-class Poteza:
-    def __init__(self, od_poz, do_poz, napred):
-        # Začetna pozicija in končna pozicija kot para celih števil
-        self.od_poz = od_poz
-        self.do_poz = do_poz
+from bit import *
 
-        # Možno napredovanje kmeta
+class Poteza:
+    # Konstanta, da poteza ni napredovanje kmeta.
+    # -1, saj je 0-11 zasedeno za indekse figur
+    NE_NAPRED = -1
+
+    def __init__(self, od, do, napred = NE_NAPRED):
+        # Začetna pozicija in končna pozicija
+        self.od = od
+        self.do = do
+
+        # Možno napredovanje kmeta.
+        # Je indeks tipa figure v katerega napreduje
         self.napred = napred
 
-    # Parsanje(prevajanje) poteze v UCI šahovski notaciji(torej tipa string) v objekt Poteza
-    def iz_uci_v_poteza(poteza_uci):
+    def napreduje(self):
+        return self.napred != NE_NAPRED
+
+    # Poteze iz UCI šahovski notaciji(torej tipa string) v objekt Poteza
+    def uci_v_poteza(self, poteza_uci):
         
 
 

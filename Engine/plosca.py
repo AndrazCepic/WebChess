@@ -1,7 +1,62 @@
+from poteza import Poteza
+from bit import *
+
+# Funkcije za generacijo začetne pozicije figur na šahovnici
+def gen_kralj(barva):
+    if barva:
+        # e1
+        return koord_v_bit(4, 0)
+    # e8
+    return koord_v_bit(4, 7)
+
+def gen_dama(barva):
+    if barva:
+        # d1
+        return koord_v_bit(3, 0)
+    # d8
+    return koord_v_bit(3, 7)
+
+def gen_trdnjava(barva):
+    if barva:
+        # a1 in h1
+        return b_or(koord_v_bit(0, 0), koord_v_bit(7, 0))
+    # a8 in h8
+    return b_or(koord_v_bit(0, 7), koord_v_bit(7, 7))
+
+def gen_lovec(barva):
+    if barva:
+        # c1 in f1
+        return b_or(koord_v_bit(2, 0), koord_v_bit(5, 0))
+    # c8 in f8
+    return b_or(koord_v_bit(2, 7), koord_v_bit(5, 7))  
+
+def gen_skakac(barva):
+    if barva:
+        # b1 in g1
+        return b_or(koord_v_bit(1, 0), koord_v_bit(6, 0))
+    # b8 in g8
+    return b_or(koord_v_bit(1, 7), koord_v_bit(6, 7))      
+
+def gen_kmet(barva):
+    bitb = 0
+    if barva:
+        # a2 - h2
+        for x in range(8):
+            bitb = b_or(bitb, koord_v_bit(x, 1))
+        return bitb
+    # a7 - h7
+    for x in range(8):
+        bitb = b_or(bitb, koord_v_bit(x, 6))
+    return bitb
+
 class Plosca:
+    # Konstanti za beleženje, kdo je na potezi
+    BELI = True
+    CRNI = False
+
     # Indeksi za bitboarde posameznih tipov figur. 
     # Te se delijo na barvo in tip figure, 
-    # torej na primer beli skakac ali pa črne dame.
+    # torej na primer beli skakači ali pa črne dame.
     B_KRALJ = 0
     B_DAMA = 1
     B_TRDNJAVA = 2
@@ -14,11 +69,7 @@ class Plosca:
     C_TRDNJAVA = 8
     C_LOVEC = 9
     C_SKAKAC = 10
-    BC_KMET = 11
-
-    # MSB 1 ostali 0 za 64 bit INT je v HEX:
-    # 0x8000000000000000
-    MSB = int("0x8000000000000000", 0)
+    C_KMET = 11
 
     def __init__(self):
         # Hranjenje trenutnih pozicij figur v formatu bitboard.
@@ -28,19 +79,28 @@ class Plosca:
         # kjer je šahovnica predstavljena kot 64 bitno število
         self.figure = []
         
+        # Generacija začetne šahovnice po vrsti kot je definirano zgoraj
+        figure.append(gen_kralj(BELI))
+        figure.append(gen_dama(BELI))
+        figure.append(gen_trdnjava(BELI))
+        figure.append(gen_lovec(BELI))
+        figure.append(gen_skakac(BELI))
+        figure.append(gen_kmet(BELI))
+
+        figure.append(gen_kralj(CRNI))
+        figure.append(gen_dama(CRNI))
+        figure.append(gen_trdnjava(CRNI))
+        figure.append(gen_lovec(CRNI))
+        figure.append(gen_skakac(CRNI))
+        figure.append(gen_kmet(CRNI))
+
         # Seznam legalnih potez, tipa Poteza
         self.legalne_poteze = []
 
         # Napadene pozicije na šahovnici 
-        self.napadeni = c_longlong(0)
+        self.napadeni = 0
 
-    def iz_koord_v_bit(x, y):
-        # MSB je pozicija a1. 
-        # X narašča v desno. SHIFT desno za x
-        # Y narašča gor. SHIFT desno za y*8, 
-        # saj y vrstic gor, vsaka ta pa je 8 bitov
-        return (MSB >> x) >> y*8
-
-    def osvezi_plosco(poteza):
+    # Prebere potezo in osveži podatke šahovnice
+    def osvezi_plosco(self, poteza):
         
     

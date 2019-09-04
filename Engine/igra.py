@@ -1,10 +1,6 @@
 from plosca import Plosca
 
 class Igra:
-    # Konstanti za beleženje, kdo je na potezi
-    BELI = True
-    CRNI = False
-
     # Konstante za beleženje stanja igre.
     # V_TEKU - Igra teče in ni končana
     # MAT_BELI - Beli je zmagal igro in matiral črnega
