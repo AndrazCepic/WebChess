@@ -13,8 +13,7 @@ class Igra:
 
 
     def __init__(self):
-        # Beleženje, kdo je na potezi
-        self.poteza = BELI
+        
 
         # Stanje igre
         self.stanje_igre = V_TEKU
