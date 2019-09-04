@@ -100,11 +100,36 @@ class Plosca:
         # Seznam legalnih potez, tipa Poteza
         self.legalne_poteze = []
 
+        # Beleženje zgodovine igre; seznam izvedenih potez skozi igro
+        # Pari objekta Poteza in INT za indeks zajete figure(None, če ni nobena)
+        self.zgod_potez = []
+
         # Napadene pozicije na šahovnici 
         self.napadeni = 0
 
     # Prebere potezo in osveži podatke šahovnice
     def zabelezi_potezo(self, poteza):
+        if poteza.je_zajem():
+            zajeti_poz = poteza.do
+            if poteza.je_en_passant():
+                # BELI: Zajeti kmet je 1 dol pod destinacijo kmeta (shift levo)
+                # CRNI: Zajeti kmet je 1 gor nad destinacijo kmeta (shift desno)
+                zajeti_poz = b_shift_l(poteza.do, 8) 
+                                if self.barva == BELI 
+                                else b_shift_d(poteza.do, 8)
+            
+            # Zabeležimo kateri tip figure je bil zajet
+            for i in range(12):
+                if self.figure[i] & zajeti_poz:
+                    poteza.tip_zajete_fig = i
+                    break
+
+            # Zbrišemo zajeto figuro iz bitboarda
+            self.figure = [b_and(bitb, b_not(zajeti_poz))
+                            if b_and(bitb, zajeti_poz)
+                            else bitb
+                            for bitb in self.figure]
+
         if poteza.je_promocija():
             figura_prom = poteza.figura_prom() + int(self.barva == CRNI) * 6
             self.figure = [b_or(self.figure[i], poteza.do) 
@@ -138,22 +163,60 @@ class Plosca:
                             if b_and(bitb, poteza.od)
                             else bitb
                             for bitb in self.figure]
+        self.zgod_potez.append(poteza)
 
+    # Razveljavi zadnjo zabeleženo potezo iz bitboarda
+    def razveljavi_potezo(self):
+        poteza = self.zgod_potez.pop()
+        
+        # Trenutna barva na vrsti(self.barva) je obratna od zadnje poteze
+        barva = not self.barva
+
+        # Zapišemo pobrisano figuro nazaj v bitboard
         if poteza.je_zajem():
             zajeti_poz = poteza.do
             if poteza.je_en_passant():
                 # BELI: Zajeti kmet je 1 dol pod destinacijo kmeta (shift levo)
                 # CRNI: Zajeti kmet je 1 gor nad destinacijo kmeta (shift desno)
                 zajeti_poz = b_shift_l(poteza.do, 8) 
-                                if self.poteza == BELI 
+                                if barva == BELI 
                                 else b_shift_d(poteza.do, 8)
-            
-            # Zbrišemo zajeto figuro iz bitboarda
-            self.figure = [b_and(bitb, b_not(zajeti_poz))
-                            if b_and(bitb, zajeti_poz)
+            self.figure[poteza.tip_zajete_fig] = b_or(self.figure[poteza.tip_zajete_fig], 
+                                                      zajeti_poz)
+        
+        if poteza.je_promocija():
+            self.figure[poteza.figura_promocije()] = b_and(self.figure[poteza.figura_promocije()],
+                                                           b_not(pozicija.do))
+            # Posebej obravnavamo kmeta, 
+            # saj iz destinacije ne moremo razbrati tipa pri promociji
+            tip = B_KMET if barva == BELI else C_KMET
+            self.figure[tip] = b_or(self.figure[tip], poteza.od)
+        elif poteza.je_rokada():
+            # Kraljeva stran
+            # Trdnjava je 1 desno od destinacije kralja
+            # Premakne se pa 1 levo od destinacije kralja
+            trdnjava_poz_od = b_shift_d(poteza.do, 1)
+            trdnjava_poz_do = b_shift_l(poteza.do, 1)
+
+            if poteza.flags == Poteza.ROKADA_Q:
+                # Damina stran; popravek
+                # Trdnjava je 2 levo od destinacije kralja
+                # Premakne se pa 1 desno od destinacije kralja
+                trdnjava_poz_od = b_shift_l(poteza.do, 2)
+                trdnjava_poz_do = b_shift_d(poteza.do, 1)
+
+                self.figure = [b_or(b_and(bitb, b_not(poteza.do)), poteza.od)
+                            if b_and(bitb, poteza.do)
+                            else b_or(b_and(bitb, b_not(trdnjava_poz_do)), trdnjava_poz_od)
+                            if b_and(bitb, trdnjava_poz_do)
                             else bitb
                             for bitb in self.figure]
+        else:
+            self.figure = [b_or(b_and(bitb, b_not(poteza.do)),poteza.od)
+                                if b_and(bitb, poteza.do)
+                                else bitb
+                                for bitb in self.figure]
 
-    def razveljavi_potezo(self, poteza):
-        
-    
+    # Generacija legalnih potez
+    def gen_legalne_poteze(self):
+        self.legalne_poteze = []

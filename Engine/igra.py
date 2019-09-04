@@ -11,18 +11,12 @@ class Igra:
     MAT_CRNI = 2
     PAT = 3
 
-
     def __init__(self):
-        
-
         # Stanje igre
         self.stanje_igre = V_TEKU
 
         # Instaca pozicij figur
         self.plosca = Plosca()
-
-        # Beleženje zgodovine igre; seznam izvedenih potez skozi igro
-        self.zgod_potez = []
 
     # Vrne True, če je bila poteza legalna in izvedena
     # Vrne False, če je bila poteza ilegalna in se ni izvedla

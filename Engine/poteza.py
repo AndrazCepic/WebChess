@@ -26,6 +26,7 @@ class Poteza:
         self.od = od
         self.do = do
         self.flags = flags
+        self.tip_zajete_fig = None
 
     def je_promocija(self):
         return self.flags & PROMOCIJA != 0
@@ -40,11 +41,11 @@ class Poteza:
     def je_zajem(self):
         return (self.flags & ZAJEM) != 0
 
-    # Vrne indeks tipa figure v skladu z def. v Plosca
+    # Vrne indeks tipa figure v skladu z definicijo v Plosca
     def figura_promocije(self):
         return (self.flags & FIGURE_P) + 1
 
-    # Poteze iz UCI šahovski notaciji(torej tipa string) v objekt Poteza
+    # Poteze iz UCI šahovski notaciji(string) v objekt Poteza
     def gen_iz_uci(self, poteza_uci):
         
 
