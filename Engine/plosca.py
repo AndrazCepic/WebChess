@@ -101,6 +101,20 @@ class Plosca:
         self.napadeni = 0
 
     # Prebere potezo in osveži podatke šahovnice
-    def osvezi_plosco(self, poteza):
+    def zabelezi_potezo(self, poteza):
+        if not poteza.napreduje():
+            self.figure = [b_or(b_and(bitb, b_not(poteza.od)),poteza.do)
+                            if b_and(bitb, poteza.od)
+                            else bitb
+                            for bitb in self.figure]
+        else:
+            self.figure = [b_or(self.figure[i], poteza.do) 
+                            if i == poteza.napred
+                            else b_and(self.figure[i], b_not(pozicija.od))
+                            if b_and(self.figure[i], pozicija.od)
+                            else self.figure[i]
+                            for i in range(12)]
+    
+    def razveljavi_potezo(self, poteza):
         
     
