@@ -98,10 +98,10 @@ class Plosca:
     def figura_na_poz(self, x, y):
         return figura_na_poziciji(koord_v_bit(x, y))
 
-    # Preveri legalnost poteze z linearnim iskanjem
-    def poteza_legalna(self, poteza):
-        for leg in self.legalne_poteze:
-            if poteza.enaka(leg):
+    # Vrne True, če je poteza v seznamu legalnih
+    def je_poteza_legalna(self, poteza):
+        for pot in self.legalne_poteze:
+            if poteza.enaka(pot):
                 return True
         return False
 
@@ -214,6 +214,14 @@ class Plosca:
                                 if b_and(bitb, poteza.do)
                                 else bitb
                                 for bitb in self.figure]
+
+    # Nastavimo dodatne info glede na trenutno igro
+    def prilagodi_potezo(self, poteza):
+        tip = figura_na_poz(poteza.od)
+        
+        if tip in (TIPI_FIGUR["w_p"], TIPI_FIGUR["b_p"]):
+            # Dvojni premik kmeta
+
 
     # Generacija legalnih potez
     def gen_legalne_poteze(self):

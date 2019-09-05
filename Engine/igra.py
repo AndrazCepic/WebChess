@@ -15,11 +15,14 @@ class Igra:
         # Stanje igre
         self.stanje_igre = STANJA["v_teku"]
 
-        # Instaca pozicij figur
+        # Instanca pozicij figur
         self.plosca = Plosca()
 
+    # Prejme UCI kodo poteze kot string
     # Vrne True, če je bila poteza legalna in izvedena
     # Vrne False, če je bila poteza ilegalna in se ni izvedla
-    def izvedi_potezo(poteza):
+    def izvedi_potezo(uci_koda):
         if not plosca.poteza_legalna():
-            
+            return False
+        
+        

@@ -49,16 +49,13 @@ class Poteza:
         return (self.flags & FIGURE_P) + 1
 
     # Enakost potez objektno
-    def enaka(pot2):
-        return self.od == pot2.od and self.do == pot2.do
-
-    #Enakost potez statično
-    @staticmethod
-    def enaki(pot1, pot2):
-        return pot1.od == pot2.od and pot1.do == pot2.do
+    def __eq__(pot2):
+        return (self.__class__ == pot2.__class__ and 
+                self.__dict__ == pot2.__dict__)
 
     # Poteze iz UCI šahovski notaciji(string) v objekt Poteza
-    def gen_iz_uci(self, uci):
+    @staticmethod
+    def gen_pot_uci(self, uci):
         # Preverimo dolžino
         if len(uci) not in [4, 5]:
             return None
@@ -82,6 +79,6 @@ class Poteza:
                 return None
 
             return Poteza(poz_od, poz_do, b_or(PROMOCIJA, PROM_STR[uci[4]]))
-
         return Poteza(poz_od, poz_do)
 
+        
