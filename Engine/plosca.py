@@ -88,6 +88,9 @@ class Plosca:
     # Vrne indeks tipa figure na poziciji ali None, če ni figure.
     # Argument je bitna pozicija
     def figura_na_poz(self, poz):
+        if poz == None:
+            return None
+
         for i in range(len(self.figure)):
             if b_and(self.figure[i], poz):
                 return i
@@ -243,6 +246,12 @@ class Plosca:
             poteza.flags = b_or(poteza.flags, Poteza.ZAJEM)
             poteza.tip_zajete_fig = tip_fig_dest
 
+    def gen_drseci(self):
+
+    def gen_kmeti(self):
+
+    def gen_napadene_poz(self):
+        
     # Generacija legalnih potez
     def gen_legalne_poteze(self):
         self.legalne_poteze = []
