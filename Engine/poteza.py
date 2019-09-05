@@ -8,19 +8,20 @@ class Poteza:
     ROKADA_Q = int("0b0011", 2)
     ZAJEM = int("0b0100", 2)
     EN_PASSANT = int("0b0101", 2)
-    PROM_Q = int("0b1000", 2)
-    PROM_R = int("0b1001", 2)
-    PROM_B = int("0b1010", 2)
-    PROM_N = int("0b1011", 2)
-    PROM_ZAJEM_Q = int("0b1100", 2)
-    PROM_ZAJEM_R = int("0b1101", 2)
-    PROM_ZAJEM_B = int("0b1110", 2)
-    PROM_ZAJEM_N = int("0b1111", 2)
-
-    # Maske tipov potez
     PROMOCIJA = int("0b1000", 2)
-    ZAJEM = int("0b0100", 2)
     FIGURE_P = int("0b0011", 2)
+
+    #PROM_Q = int("0b1000", 2)
+    #PROM_R = int("0b1001", 2)
+    #PROM_B = int("0b1010", 2)
+    #PROM_N = int("0b1011", 2)
+    #PROM_ZAJEM_Q = int("0b1100", 2)
+    #PROM_ZAJEM_R = int("0b1101", 2)
+    #PROM_ZAJEM_B = int("0b1110", 2)
+    #PROM_ZAJEM_N = int("0b1111", 2)
+
+    # String oznake za figure pri promociji
+    PROM_STR = {"q" : 0, "r" : 1, "b" : 2, "n" : 3}
 
     def __init__(self, od, do, flags = QUIET):
         self.od = od
@@ -29,7 +30,7 @@ class Poteza:
         self.tip_zajete_fig = None
 
     def je_promocija(self):
-        return self.flags & PROMOCIJA != 0
+        return (self.flags & PROMOCIJA) != 0
 
     def je_rokada(self):
         return self.flags == ROKADA_K or self.flags == ROKADA_Q
@@ -42,11 +43,45 @@ class Poteza:
         return (self.flags & ZAJEM) != 0
 
     # Vrne indeks tipa figure v skladu z definicijo v Plosca
+    # Prva dva bita določata figuro.
+    # Q = 0, R = 1, B = 2, N = 3
     def figura_promocije(self):
         return (self.flags & FIGURE_P) + 1
 
-    # Poteze iz UCI šahovski notaciji(string) v objekt Poteza
-    def gen_iz_uci(self, poteza_uci):
-        
+    # Enakost potez objektno
+    def enaka(pot2):
+        return self.od == pot2.od and self.do == pot2.do
 
+    #Enakost potez statično
+    @staticmethod
+    def enaki(pot1, pot2):
+        return pot1.od == pot2.od and pot1.do == pot2.do
+
+    # Poteze iz UCI šahovski notaciji(string) v objekt Poteza
+    def gen_iz_uci(self, uci):
+        # Preverimo dolžino
+        if len(uci) not in [4, 5]:
+            return None
+
+        x1 = int(uci[0]) - int("a")
+        x2 = int(uci[2]) - int("a")
+        y1 = int(uci[1])
+        y2 = int(uci[3])
+
+        # Preverimo koordinate
+        if not all(x in range(8) for x in [x1, x2, y1, y2]):
+            return None
+
+        poz_od = koord_v_bit(x1, y1)
+        poz_do = koord_v_bit(x2, y2)
+
+        # Promocija
+        if len(uci) == 5:
+            # Preverimo string
+            if uci[4] not in PROM_STR:
+                return None
+
+            return Poteza(poz_od, poz_do, b_or(PROMOCIJA, PROM_STR[uci[4]]))
+
+        return Poteza(poz_od, poz_do)
 

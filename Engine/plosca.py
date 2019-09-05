@@ -2,52 +2,50 @@ from poteza import Poteza
 from bit import *
 
 # Funkcije za generacijo začetne pozicije figur na šahovnici
-def gen_kralj(barva):
-    if barva:
+def gen_zacetno_poz(tip):
+    if tip == "w_k":
         # e1
         return koord_v_bit(4, 0)
-    # e8
-    return koord_v_bit(4, 7)
-
-def gen_dama(barva):
-    if barva:
+    elif tip == "b_k":
+        # e8
+        return koord_v_bit(4, 7)    
+    elif tip == "w_q":
         # d1
         return koord_v_bit(3, 0)
-    # d8
-    return koord_v_bit(3, 7)
-
-def gen_trdnjava(barva):
-    if barva:
+    elif tip == "b_q":
+        # d8
+        return koord_v_bit(3, 7)
+    elif tip == "w_r":
         # a1 in h1
         return b_or(koord_v_bit(0, 0), koord_v_bit(7, 0))
-    # a8 in h8
-    return b_or(koord_v_bit(0, 7), koord_v_bit(7, 7))
-
-def gen_lovec(barva):
-    if barva:
+    elif tip == "b_r":
+        # a8 in h8
+        return b_or(koord_v_bit(0, 7), koord_v_bit(7, 7))    
+    elif tip == "w_b":
         # c1 in f1
         return b_or(koord_v_bit(2, 0), koord_v_bit(5, 0))
-    # c8 in f8
-    return b_or(koord_v_bit(2, 7), koord_v_bit(5, 7))  
-
-def gen_skakac(barva):
-    if barva:
+    elif tip == "b_b":
+        # c8 in f8
+        return b_or(koord_v_bit(2, 7), koord_v_bit(5, 7))
+    elif tip == "w_n":
         # b1 in g1
         return b_or(koord_v_bit(1, 0), koord_v_bit(6, 0))
-    # b8 in g8
-    return b_or(koord_v_bit(1, 7), koord_v_bit(6, 7))      
-
-def gen_kmet(barva):
-    bitb = 0
-    if barva:
+    elif tip == "b_n":
+        # b8 in g8
+        return b_or(koord_v_bit(1, 7), koord_v_bit(6, 7))        
+    elif tip == "w_p":
         # a2 - h2
+        bitb = 0    
         for x in range(8):
             bitb = b_or(bitb, koord_v_bit(x, 1))
         return bitb
-    # a7 - h7
-    for x in range(8):
-        bitb = b_or(bitb, koord_v_bit(x, 6))
-    return bitb
+    elif tip == "b_p":
+        # a7 - h7
+        bitb = 0
+        for x in range(8):
+            bitb = b_or(bitb, koord_v_bit(x, 6))
+        return bitb
+    return None
 
 class Plosca:
     # Konstanti za beleženje, kdo je na potezi
@@ -55,21 +53,12 @@ class Plosca:
     CRNI = False
 
     # Indeksi za bitboarde posameznih tipov figur. 
-    # Te se delijo na barvo in tip figure, 
+    # Te se delijo na barvo(w = beli, b = črni) in tip figure(standardna notacija), 
     # torej na primer beli skakači ali pa črne dame.
-    B_KRALJ = 0
-    B_DAMA = 1
-    B_TRDNJAVA = 2
-    B_LOVEC = 3
-    B_SKAKAC = 4
-    B_KMET = 5
-
-    C_KRALJ = 6
-    C_DAMA = 7
-    C_TRDNJAVA = 8
-    C_LOVEC = 9
-    C_SKAKAC = 10
-    C_KMET = 11
+    TIPI_FIGUR = {"w_k" : 0, "w_q" : 1, "w_r" : 2,
+                  "w_b" : 3, "w_n" : 4, "w_p" : 5,
+                  "b_k" : 6, "b_q" : 7, "b_r" : 8,
+                  "b_b" : 9, "b_n" : 10, "b_p" : 11}
 
     def __init__(self):
         # Beleženje, kdo je na potezi
@@ -79,33 +68,42 @@ class Plosca:
         # Na šahovnici je 12 različnih tipov figur.
         # Za vsak tip posebej imamo pozicije figur tega tipa na šahovnici.
         # Te podatke hranimo v t.i bitboard implementaciji, 
-        # kjer je šahovnica predstavljena kot 64 bitno število
-        self.figure = []
+        # kjer je šahovnica predstavljena kot 64 bitno število.
+        self.figure = [0 for i in range(12)]
         
-        # Generacija začetne šahovnice po vrsti kot je definirano zgoraj
-        figure.append(gen_kralj(BELI))
-        figure.append(gen_dama(BELI))
-        figure.append(gen_trdnjava(BELI))
-        figure.append(gen_lovec(BELI))
-        figure.append(gen_skakac(BELI))
-        figure.append(gen_kmet(BELI))
-
-        figure.append(gen_kralj(CRNI))
-        figure.append(gen_dama(CRNI))
-        figure.append(gen_trdnjava(CRNI))
-        figure.append(gen_lovec(CRNI))
-        figure.append(gen_skakac(CRNI))
-        figure.append(gen_kmet(CRNI))
+        # Generacija začetne šahovnice po vrsti kot je definirano zgoraj.
+        for tip in TIPI_FIGUR:
+            self.figure[TIPI_FIGUR[tip]] = gen_zacetno_poz(tip)
 
         # Seznam legalnih potez, tipa Poteza
         self.legalne_poteze = []
 
-        # Beleženje zgodovine igre; seznam izvedenih potez skozi igro
-        # Pari objekta Poteza in INT za indeks zajete figure(None, če ni nobena)
+        # Beleženje zgodovine igre; seznam izvedenih potez skozi igro.
+        # Pari objekta Poteza in INT za indeks zajete figure(None, če ni nobena).
         self.zgod_potez = []
 
         # Napadene pozicije na šahovnici 
         self.napadeni = 0
+
+    # Vrne indeks tipa figure na poziciji ali None, če ni figure.
+    # Argument je bitna pozicija
+    def figura_na_poz(self, poz):
+        for i in range(len(self.figure)):
+            if b_and(self.figure[i], poz):
+                return i
+        return None
+
+    # Vrne tip figure na poziciji
+    # Argument je (x,y) pozicija
+    def figura_na_poz(self, x, y):
+        return figura_na_poziciji(koord_v_bit(x, y))
+
+    # Preveri legalnost poteze z linearnim iskanjem
+    def poteza_legalna(self, poteza):
+        for leg in self.legalne_poteze:
+            if poteza.enaka(leg):
+                return True
+        return False
 
     # Prebere potezo in osveži podatke šahovnice
     def zabelezi_potezo(self, poteza):
@@ -189,7 +187,7 @@ class Plosca:
                                                            b_not(pozicija.do))
             # Posebej obravnavamo kmeta, 
             # saj iz destinacije ne moremo razbrati tipa pri promociji
-            tip = B_KMET if barva == BELI else C_KMET
+            tip = TIPI_FIGUR["w_p"] if barva == BELI else TIPI_FIGUR["b_p"]
             self.figure[tip] = b_or(self.figure[tip], poteza.od)
         elif poteza.je_rokada():
             # Kraljeva stran
@@ -220,3 +218,4 @@ class Plosca:
     # Generacija legalnih potez
     def gen_legalne_poteze(self):
         self.legalne_poteze = []
+        
