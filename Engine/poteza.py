@@ -1,13 +1,13 @@
 from bit import *
 
 class Poteza:
-    # Flags tipov potez
+    # Maske tipov potez
     QUIET = int("0b0000", 2)
     DVOJNI_KMET = int("0b0001", 2)
     ROKADA_K = int("0b0010", 2)
     ROKADA_Q = int("0b0011", 2)
-    ZAJEM = int("0b0100", 2)
     EN_PASSANT = int("0b0101", 2)
+    ZAJEM = int("0b0100", 2)
     PROMOCIJA = int("0b1000", 2)
     FIGURE_P = int("0b0011", 2)
 
@@ -41,6 +41,9 @@ class Poteza:
     # Ang. capture
     def je_zajem(self):
         return (self.flags & ZAJEM) != 0
+
+    def je_dvojni_kmet(self):
+        return self.flags == DVOJNI_KMET
 
     # Vrne indeks tipa figure v skladu z definicijo v Plosca
     # Prva dva bita določata figuro.

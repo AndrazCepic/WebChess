@@ -95,7 +95,7 @@ class Plosca:
 
     # Vrne tip figure na poziciji
     # Argument je (x,y) pozicija
-    def figura_na_poz(self, x, y):
+    def figura_na_poz_koord(self, x, y):
         return figura_na_poziciji(koord_v_bit(x, y))
 
     # Vrne True, če je poteza v seznamu legalnih
@@ -219,9 +219,29 @@ class Plosca:
     def prilagodi_potezo(self, poteza):
         tip = figura_na_poz(poteza.od)
         
+        # Kmet
         if tip in (TIPI_FIGUR["w_p"], TIPI_FIGUR["b_p"]):
-            # Dvojni premik kmeta
-
+            # Dvojni premik kmeta; razlika v y je 2
+            if poteza.do in (b_shift_d(poteza.od, 16), b_shift_l(poteza.od, 16)):
+                poteza.flags = Poteza.DVOJNI_KMET
+            # En Passant
+            # Kmet eno nad ali pod tistim, ki se je prej premaknil za 2
+            if self.zgod_potez[-1].je_dvojni_kmet():
+                if poteza.do in (b_shift_l(self.zgod_potez[-1].do, 8), 
+                                 b_shift_d(self.zgod_potez[-1].do, 8)):
+                    poteza.flags = Poteza.EN_PASSANT
+        # Kralj
+        if tip in (TIPI_FIGUR["w_k"], TIPI_FIGUR["b_k"]):
+            # Rokada; razlika v x je 2
+            if poteza.do == b_shift_d(poteza.od, 2):
+                poteza.flags = Poteza.ROKADA_K
+            elif poteza.do == b_shift_l(poteza.od, 2):
+                poteza.flags = Poteza.ROKADA_Q
+        # Zajemi
+        tip_fig_dest = figura_na_poz(poteza.do)
+        if tip_fig_dest != None:
+            poteza.flags = b_or(poteza.flags, Poteza.ZAJEM)
+            poteza.tip_zajete_fig = tip_fig_dest
 
     # Generacija legalnih potez
     def gen_legalne_poteze(self):
