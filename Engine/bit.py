@@ -52,6 +52,23 @@ def koord_premik(poz, x, y):
 def koord_poz(poz):
     return (koord_x(poz), koord_y(poz))
 
+# Žarek med figurama. vrne pozicije med pozicijama
+# Deluje diagonalno, horizontalno ali pa vertikalno
+@lru_cache(maxsize=None)
+def ray_cast(od, do):
+    x1, y1 = koord_poz(od)
+    x2, y2 = koord_poz(do)
+    dif_x = x2 - x1
+    dif_y = y2 - y1
+    dir_x = 1 if dif_x > 0 else 0 if dif_x = 0 else -1 if dif_x < 0
+    dir_y = 1 if dif_y > 0 else 0 if dif_y = 0 else -1 if dif_y < 0
+    list_poz = []
+    poz = koord_premik(od, dir_x, dir_y)
+    while poz != do:
+        list_poz.append(poz)
+        poz = koord_premik(poz, dir_x, dir_y)
+    return list_poz
+
 # Wrapper osnovnih binarnih operacij,
 # da ni povsod klicanja sign_v_unsign drugje
 def b_and(x, y):
