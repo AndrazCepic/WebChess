@@ -47,6 +47,11 @@ def gen_zacetno_poz(tip):
         return bitb
     return None
 
+# Najde figure v bitboardu in vrne seznam pozicij teh figur
+def najdi_figure(bitb):
+    return [koord_v_bit(x, y) for y in range(8) for x in range(8) 
+            if b_and(koord_v_bit(x, y), bitb)]
+
 class Plosca:
     # Konstanti za beleženje, kdo je na potezi
     BELI = True
@@ -99,7 +104,7 @@ class Plosca:
     # Vrne tip figure na poziciji
     # Argument je (x,y) pozicija
     def figura_na_poz_koord(self, x, y):
-        return figura_na_poziciji(koord_v_bit(x, y))
+        return self.figura_na_poz(koord_v_bit(x, y))
 
     # Vrne True, če je poteza v seznamu legalnih
     def je_poteza_legalna(self, poteza):
@@ -220,7 +225,7 @@ class Plosca:
 
     # Nastavimo dodatne info glede na trenutno igro
     def prilagodi_potezo(self, poteza):
-        tip = figura_na_poz(poteza.od)
+        tip = self.figura_na_poz(poteza.od)
         
         # Kmet
         if tip in (TIPI_FIGUR["w_p"], TIPI_FIGUR["b_p"]):
@@ -241,18 +246,93 @@ class Plosca:
             elif poteza.do == b_shift_l(poteza.od, 2):
                 poteza.flags = Poteza.ROKADA_Q
         # Zajemi
-        tip_fig_dest = figura_na_poz(poteza.do)
+        tip_fig_dest = self.figura_na_poz(poteza.do)
         if tip_fig_dest != None:
             poteza.flags = b_or(poteza.flags, Poteza.ZAJEM)
             poteza.tip_zajete_fig = tip_fig_dest
 
-    def gen_drseci(self):
+    # Generacija premikov za drseče figure(Q, R, B). Spustimo kralja
+    def gen_drseci(self, zac_poz, dir_x, dir_y, barva):
+        poz = koord_premik(zac_poz, dir_x, dir_y)
+        tip_figure = self.figura_na_poz(poz)
+        list_premiki = []
+        # Dodamo prazne prostore
+        while tip_figure in (None, TIPI_FIGUR["w_k"], TIPI_FIGUR["b_k"]) and poz != None:
+            list_premiki.append(poz)
+            poz = koord_premik(zac_poz, dir_x, dir_y)
+            tip_figure = self.figura_na_poz(poz)
+        # Dodamo zadnjega, ki je na šahovnici; ni prazen
+        if pot != None:
+            list_premiki.append(poz)
+        return list_premiki
 
-    def gen_kmeti(self):
-
+    # Generacija bitboarda napadenih potez
     def gen_napadene_poz(self):
-        
+        list_premikov = []
+        fig_indeks = TIPI_FIGUR["b_k"] if self.barva == BELI else TIPI_FIGUR["w_k"]
+        premik = 0
+
+        # K; v vse smeri
+        poz_list = najdi_figure(self.figure[fig_indeks])
+        for x in (-1, 0, 1):
+            for y in (-1, 0, 1):
+                premik = koord_premik(poz_list[0], x, y)
+                if not (x == 0 and y == 0) and premik != None:
+                    list_premikov.append(premik)
+        # Q
+        fig_indeks += 1
+        poz_list = najdi_figure(self.figure[fig_indeks])
+        for poz in poz_list:
+            for x in (-1, 0, 1):
+                for y in (-1, 0, 1):
+                    # Vse smeri
+                    if not (x == 0 and y == 0):
+                        list_premikov += self.gen_drseci(poz, x, y, not self.barva)
+        # R
+        fig_indeks += 1
+        poz_list = najdi_figure(self.figure[fig_indeks])
+        for poz in poz_list:
+            for x in (-1, 0, 1):
+                for y in (-1, 0, 1):
+                    # Samo hor. vert. smeri, torej en je 0
+                    if not (x == 0 and y == 0) and (x == 0 or y == 0):
+                        list_premikov += self.gen_drseci(poz, x, y, not self.barva)
+        # B
+        fig_indeks += 1
+        poz_list = najdi_figure(self.figure[fig_indeks])
+        for poz in poz_list:
+            for x in (-1, 0, 1):
+                for y in (-1, 0, 1):
+                    # Samo diag, torej oba razlicna od 0
+                    if x != 0 and y != 0:
+                        list_premikov += self.gen_drseci(poz, x, y, not self.barva)
+        # N
+        fig_indeks += 1
+        poz_list = najdi_figure(self.figure[fig_indeks])
+        for poz in poz_list:
+            for x in (-2, -1, 1, 2):
+                for y in (-2, -1, 1, 2):
+                    premik = koord_premik(poz, x, y)
+                    # Nista oba premik za 1
+                    if not (x in (-1, 1) and y in (-1, 1)) and premik != None:
+                        list_premikov.append(premik)
+        # P
+        fig_indeks += 1
+        poz_list = najdi_figure(self.figure[fig_indeks])
+        for poz in poz_list:
+            # Napada lahko samo po diag
+            for x in (-1, 1):
+                premik = koord_premik(poz, x, 1)
+                if premik != None:
+                    list_premikov.append(premik)
+        # Mergamo ta seznam napadenih pozicij v bitboard
+        self.napadeni = 0
+        for poz in list_premikov:
+            self.napadeni = b_or(self.napadeni, poz)
+
     # Generacija legalnih potez
     def gen_legalne_poteze(self):
         self.legalne_poteze = []
+        
+        # K
         

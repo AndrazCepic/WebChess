@@ -1,4 +1,5 @@
 from ctypes import c_ulonglong
+from functools import lru_cache
 
 # Python dela z signed int, mi pa potrebujemo unsigned
 def sign_v_unsign(x):
@@ -15,11 +16,28 @@ def koord_v_bit(x, y):
     # saj y vrstic gor, vsaka ta pa je 8 bitov
     return sign_v_unsign((MSB >> x) >> y*8)
 
+@lru_cache(maxsize=None)
+def koord_y(poz):
+    count = 0
+    while poz != 0:
+        poz = sign_v_unsign(poz << 8)
+        count += 1
+    return count
+    
+@lru_cache(maxsize=None)
+def koord_x(poz):
+    count = 0
+    y = koord_y(poz)
+    while koord_y(poz) == y:
+        poz = sign_v_unsign(poz << 1)
+        count += 1
+    return count
+
+@lru_cache(maxsize=None)
 def koord_premik(poz, x, y):
     if (koord_x(poz) + x not in range(8)) or
        (koord_y(poz) + y) not in range(8)):
        return None
-
     if x >= 0:
         if y >= 0:
             return sign_v_unsign((poz >> x) >> y*8)
@@ -30,21 +48,6 @@ def koord_premik(poz, x, y):
             return sign_v_unsign((poz << (-x)) >> y*8)
         else:
             return sign_v_unsign((poz << (-x)) << (-y)*8)
-
-def koord_y(poz):
-    count = 0
-    while poz != 0:
-        poz = sign_v_unsign(poz << 8)
-        count += 1
-    return count
-    
-def koord_x(poz):
-    count = 0
-    y = koord_y(poz)
-    while koord_y(poz) == y:
-        poz = sign_v_unsign(poz << 1)
-        count += 1
-    return count
 
 def koord_poz(poz):
     return (koord_x(poz), koord_y(poz))

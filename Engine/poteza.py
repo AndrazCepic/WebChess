@@ -58,7 +58,7 @@ class Poteza:
 
     # Poteze iz UCI šahovski notaciji(string) v objekt Poteza
     @staticmethod
-    def gen_pot_uci(self, uci):
+    def gen_pot_uci(uci):
         # Preverimo dolžino
         if len(uci) not in [4, 5]:
             return None
@@ -80,7 +80,6 @@ class Poteza:
             # Preverimo string
             if uci[4] not in PROM_STR:
                 return None
-
             return Poteza(poz_od, poz_do, b_or(PROMOCIJA, PROM_STR[uci[4]]))
         return Poteza(poz_od, poz_do)
 
