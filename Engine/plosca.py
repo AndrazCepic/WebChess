@@ -89,6 +89,7 @@ class Plosca:
 
         # Napadene pozicije na šahovnici 
         self.napadeni = 0
+        self.check = False
 
     # Vrne indeks tipa figure na poziciji ali None, če ni figure.
     # Argument je bitna pozicija
@@ -250,6 +251,7 @@ class Plosca:
         if tip_fig_dest != None:
             poteza.flags = b_or(poteza.flags, Poteza.ZAJEM)
             poteza.tip_zajete_fig = tip_fig_dest
+        return poteza
 
     # Generacija premikov za drseče figure(Q, R, B). Spustimo kralja
     def gen_drseci(self, zac_poz, dir_x, dir_y, barva):
@@ -329,24 +331,40 @@ class Plosca:
         self.napadeni = 0
         for poz in list_premikov:
             self.napadeni = b_or(self.napadeni, poz)
+        return list_premikov
 
     # Generacija legalnih potez
     def gen_legalne_poteze(self):
         self.legalne_poteze = []
-        self.gen_napadene_poz()
+        napadeni = self.gen_napadene_poz()
+        check = 0
         # K
         poz_list = najdi_figure(self.figure[TIPI_FIGUR["w_k"] 
                                 if self.barva == BELI
                                 else self.figure[TIPI_FIGUR["b_k"]])
-        for poz in poz_list:
-            for x in (-1, 0, 1):
-                for y in (-1, 0, 1):
-                    premik = koord_premik(poz, x, y)
-                    if not (x == 0 and y == 0) and premik != None:
-                        # Legalnost
-                        if (not je_v_bitb(self.napadeni, premik) and
-                                self.figura_na_poz(premik) not in 
-                                range(1 if self.barva else 7, 6 if self.barva else 12)):
-                            self.legalne_poteze.append(Poteza(poz, premik))
-        # Rokada 
+        poz_kralj = poz_list[0]
+        for x in (-1, 0, 1):
+            for y in (-1, 0, 1):
+                premik = koord_premik(poz_kralj, x, y)
+                if not (x == 0 and y == 0) and premik != None:
+                    # Legalnost
+                    if (not je_v_bitb(self.napadeni, premik) and
+                            self.figura_na_poz(premik) not in 
+                            range(1 if self.barva else 7, 6 if self.barva else 12)):
+                        self.legalne_poteze.append(self.prilagodi_potezo(Poteza(poz_kralj, premik)))
+        # Ali je šah. Preštejemo število napadalcev polja kralja
+        for poz in napadeni:
+            if poz == poz_kralj:
+                check += 1
+        self.check = True
+        # Dvojni šah. legalne so samo poteze kralja, 
+        # saj nobena figura ne more zajeti več kot ene na enkrat
+        if check > 1:
+            # Smo že obravnavali te poteze, torej samo končamo postopek
+            return
+        elif check == 1:
+            
+        else:
+            self.check = False
+        
         
