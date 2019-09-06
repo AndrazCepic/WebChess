@@ -70,3 +70,6 @@ def b_shift_d(stev, x):
 # Shift levo za x mest: stev << x
 def b_shift_l(stev, x):
     return sign_v_unsign(stev << x)
+
+def je_v_bitb(bitb, poz):
+    return b_and(bitb, poz) != 0

@@ -50,7 +50,7 @@ def gen_zacetno_poz(tip):
 # Najde figure v bitboardu in vrne seznam pozicij teh figur
 def najdi_figure(bitb):
     return [koord_v_bit(x, y) for y in range(8) for x in range(8) 
-            if b_and(koord_v_bit(x, y), bitb)]
+            if je_v_bitb(bitb, koord_v_bit(x, y))]
 
 class Plosca:
     # Konstanti za beleženje, kdo je na potezi
@@ -97,7 +97,7 @@ class Plosca:
             return None
 
         for i in range(len(self.figure)):
-            if b_and(self.figure[i], poz):
+            if je_v_bitb(self.figure[i], poz):
                 return i
         return None
 
@@ -132,7 +132,7 @@ class Plosca:
 
             # Zbrišemo zajeto figuro iz bitboarda
             self.figure = [b_and(bitb, b_not(zajeti_poz))
-                            if b_and(bitb, zajeti_poz)
+                            if je_v_bitb(bitb, zajeti_poz)
                             else bitb
                             for bitb in self.figure]
 
@@ -141,7 +141,7 @@ class Plosca:
             self.figure = [b_or(self.figure[i], poteza.do) 
                             if i == figura_prom
                             else b_and(self.figure[i], b_not(pozicija.od))
-                            if b_and(self.figure[i], pozicija.od)
+                            if je_v_bitb(self.figure[i], pozicija.od)
                             else self.figure[i]
                             for i in range(12)]
         elif poteza.je_rokada():
@@ -159,14 +159,14 @@ class Plosca:
                 trdnjava_poz_do = b_shift_d(poteza.do, 1)
 
             self.figure = [b_or(b_and(bitb, b_not(poteza.od)),poteza.do)
-                        if b_and(bitb, poteza.od)
+                        if je_v_bitb(bitb, poteza.od)
                         else b_or(b_and(bitb, b_not(trdnjava_poz_od)),trdnjava_poz_do)
-                        if b_and(bitb, trdnjava_poz_od)
+                        if je_v_bitb(bitb, trdnjava_poz_od)
                         else bitb
                         for bitb in self.figure]
         else:
             self.figure = [b_or(b_and(bitb, b_not(poteza.od)),poteza.do)
-                            if b_and(bitb, poteza.od)
+                            if je_v_bitb(bitb, poteza.od)
                             else bitb
                             for bitb in self.figure]
         self.zgod_potez.append(poteza)
@@ -212,14 +212,14 @@ class Plosca:
                 trdnjava_poz_do = b_shift_d(poteza.do, 1)
 
                 self.figure = [b_or(b_and(bitb, b_not(poteza.do)), poteza.od)
-                            if b_and(bitb, poteza.do)
+                            if je_v_bitb(bitb, poteza.do)
                             else b_or(b_and(bitb, b_not(trdnjava_poz_do)), trdnjava_poz_od)
-                            if b_and(bitb, trdnjava_poz_do)
+                            if je_v_bitb(bitb, trdnjava_poz_do)
                             else bitb
                             for bitb in self.figure]
         else:
             self.figure = [b_or(b_and(bitb, b_not(poteza.do)),poteza.od)
-                                if b_and(bitb, poteza.do)
+                                if je_v_bitb(bitb, poteza.do)
                                 else bitb
                                 for bitb in self.figure]
 
@@ -333,6 +333,20 @@ class Plosca:
     # Generacija legalnih potez
     def gen_legalne_poteze(self):
         self.legalne_poteze = []
-        
+        self.gen_napadene_poz()
         # K
+        poz_list = najdi_figure(self.figure[TIPI_FIGUR["w_k"] 
+                                if self.barva == BELI
+                                else self.figure[TIPI_FIGUR["b_k"]])
+        for poz in poz_list:
+            for x in (-1, 0, 1):
+                for y in (-1, 0, 1):
+                    premik = koord_premik(poz, x, y)
+                    if not (x == 0 and y == 0) and premik != None:
+                        # Legalnost
+                        if (not je_v_bitb(self.napadeni, premik) and
+                                self.figura_na_poz(premik) not in 
+                                range(1 if self.barva else 7, 6 if self.barva else 12)):
+                            self.legalne_poteze.append(Poteza(poz, premik))
+        # Rokada 
         
