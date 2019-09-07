@@ -409,7 +409,7 @@ class Plosca:
             # Katera figura daje šah
             poz_napad = check_poteze[0].od
             # Ali je drseča
-            poz_vmes = []
+            poz_vmes = 0
             if je_fig_drseca(self.figura_na_poz(poz_napad)):
                 poz_vmes = ray_cast(poz_napad, poz_kralj)
             
@@ -425,7 +425,7 @@ class Plosca:
                 if poteza.je_zajem():
                     if poteza.poz_zajete_fig == poz_napad:
                         self.legalne_poteze.append(poteza)
-                if poteza.do in poz_vmes:
+                if je_v_bitb(poz_vmes, poteza.do):
                     self.legalne_poteze.append(poteza)
             return
         self.check = False
