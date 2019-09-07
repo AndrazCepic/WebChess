@@ -1,5 +1,17 @@
-from poteza import Poteza
+from poteza import *
 from bit import *
+
+# Konstanti za beleženje, kdo je na potezi
+BELI = True
+CRNI = False
+
+# Indeksi za bitboarde posameznih tipov figur. 
+# Te se delijo na barvo(w = beli, b = črni) in tip figure(standardna notacija), 
+# torej na primer beli skakači ali pa črne dame.
+TIPI_FIGUR = {"w_k" : 0, "w_q" : 1, "w_r" : 2,
+                "w_b" : 3, "w_n" : 4, "w_p" : 5,
+                "b_k" : 6, "b_q" : 7, "b_r" : 8,
+                "b_b" : 9, "b_n" : 10, "b_p" : 11}
 
 # Funkcije za generacijo začetne pozicije figur na šahovnici
 def gen_zacetno_poz(tip):
@@ -52,19 +64,11 @@ def najdi_figure(bitb):
     return [koord_v_bit(x, y) for y in range(8) for x in range(8) 
             if je_v_bitb(bitb, koord_v_bit(x, y))]
 
+def je_fig_drseca(self, fig):
+    return fig in (TIPI_FIGUR["w_q"], TIPI_FIGUR["w_r"], TIPI_FIGUR["w_b"],
+                       TIPI_FIGUR["b_q"], TIPI_FIGUR["b_r"], TIPI_FIGUR["b_b"])
+
 class Plosca:
-    # Konstanti za beleženje, kdo je na potezi
-    BELI = True
-    CRNI = False
-
-    # Indeksi za bitboarde posameznih tipov figur. 
-    # Te se delijo na barvo(w = beli, b = črni) in tip figure(standardna notacija), 
-    # torej na primer beli skakači ali pa črne dame.
-    TIPI_FIGUR = {"w_k" : 0, "w_q" : 1, "w_r" : 2,
-                  "w_b" : 3, "w_n" : 4, "w_p" : 5,
-                  "b_k" : 6, "b_q" : 7, "b_r" : 8,
-                  "b_b" : 9, "b_n" : 10, "b_p" : 11}
-
     def __init__(self):
         # Beleženje, kdo je na potezi
         self.barva = BELI
@@ -236,9 +240,10 @@ class Plosca:
             # En Passant
             # Kmet eno nad ali pod tistim, ki se je prej premaknil za 2
             if self.zgod_potez[-1].je_dvojni_kmet():
-                if poteza.do in (b_shift_l(self.zgod_potez[-1].do, 8), 
-                                 b_shift_d(self.zgod_potez[-1].do, 8)):
+                if poteza.do in (koord_premik(self.zgod_potez[-1].do, 0, -1), 
+                                 koord_premik(self.zgod_potez[-1].do, 0, 1)):
                     poteza.flags = Poteza.EN_PASSANT
+                    poteza.poz_zajete_fig = self.zgod_potez[-1].do
         # Kralj
         if tip in (TIPI_FIGUR["w_k"], TIPI_FIGUR["b_k"]):
             # Rokada; razlika v x je 2
@@ -251,10 +256,12 @@ class Plosca:
         if tip_fig_dest != None:
             poteza.flags = b_or(poteza.flags, Poteza.ZAJEM)
             poteza.tip_zajete_fig = tip_fig_dest
+            poteza.poz_zajete_fig = poteza.do
         return poteza
 
     # Generacija premikov za drseče figure(Q, R, B). Spustimo kralja
-    def gen_drseci(self, zac_poz, dir_x, dir_y, barva):
+    # To so žarki v različne smeri podane z argumenti
+    def gen_ray(self, zac_poz, dir_x, dir_y, barva):
         poz = koord_premik(zac_poz, dir_x, dir_y)
         tip_figure = self.figura_na_poz(poz)
         list_premiki = []
@@ -268,28 +275,18 @@ class Plosca:
             list_premiki.append(poz)
         return list_premiki
 
-    # Generacija bitboarda napadenih potez
-    def gen_napadene_poz(self):
-        list_premikov = []
-        fig_indeks = TIPI_FIGUR["b_k"] if self.barva == BELI else TIPI_FIGUR["w_k"]
-        premik = 0
-
-        # K; v vse smeri
-        poz_list = najdi_figure(self.figure[fig_indeks])
-        for x in (-1, 0, 1):
-            for y in (-1, 0, 1):
-                premik = koord_premik(poz_list[0], x, y)
-                if not (x == 0 and y == 0) and premik != None:
-                    list_premikov.append(premik)
+    # Generacija potez drsečih figur za barvo
+    def gen_drseči(self, barva):
+        list_potez = []
+        fig_indeks = TIPI_FIGUR["w_q" if barva else "b_q"]
         # Q
-        fig_indeks += 1
         poz_list = najdi_figure(self.figure[fig_indeks])
         for poz in poz_list:
             for x in (-1, 0, 1):
                 for y in (-1, 0, 1):
                     # Vse smeri
                     if not (x == 0 and y == 0):
-                        list_premikov += self.gen_drseci(poz, x, y, not self.barva)
+                        list_potez += [Poteza(poz, poz_do) for poz_do in self.gen_ray(poz, x, y, barva)]
         # R
         fig_indeks += 1
         poz_list = najdi_figure(self.figure[fig_indeks])
@@ -298,7 +295,7 @@ class Plosca:
                 for y in (-1, 0, 1):
                     # Samo hor. vert. smeri, torej en je 0
                     if not (x == 0 and y == 0) and (x == 0 or y == 0):
-                        list_premikov += self.gen_drseci(poz, x, y, not self.barva)
+                        list_potez += [Poteza(poz, poz_do) for poz_do in self.gen_ray(poz, x, y, barva)]
         # B
         fig_indeks += 1
         poz_list = najdi_figure(self.figure[fig_indeks])
@@ -307,42 +304,86 @@ class Plosca:
                 for y in (-1, 0, 1):
                     # Samo diag, torej oba razlicna od 0
                     if x != 0 and y != 0:
-                        list_premikov += self.gen_drseci(poz, x, y, not self.barva)
-        # N
-        fig_indeks += 1
-        poz_list = najdi_figure(self.figure[fig_indeks])
+                        list_potez += [Poteza(poz, poz_do) for poz_do in self.gen_ray(poz, x, y, barva)]
+        return list_potez
+
+    # Poteze skakačev
+    def gen_skakac(self, barva):
+        list_potez = []
+        poz_list = najdi_figure(self.figure[TIPI_FIGUR["w_n" if barva else "b_n"]])
         for poz in poz_list:
             for x in (-2, -1, 1, 2):
                 for y in (-2, -1, 1, 2):
                     premik = koord_premik(poz, x, y)
                     # Nista oba premik za 1
                     if not (x in (-1, 1) and y in (-1, 1)) and premik != None:
-                        list_premikov.append(premik)
-        # P
-        fig_indeks += 1
-        poz_list = najdi_figure(self.figure[fig_indeks])
+                        list_potez.append(Poteza(poz, premik))
+        return list_potez
+
+    def gen_kmet_potisk(self, barva):
+        list_potez = []
+        poz_list = najdi_figure(self.figure[TIPI_FIGUR["w_p" if barva else "b_p"]])
         for poz in poz_list:
-            # Napada lahko samo po diag
+            # 1 gor
+            premik = koord_premik(poz, 0, 1)
+            if self.figura_na_poz(premik) == None and premik != None:
+                # Še promocija
+                if koord_y == (7 if barva else 1):
+                    for i in range(4):
+                        list_potez.append(Poteza(poz, premik, PROMOCIJA | i))
+                else:
+                    list_potez.append(Poteza(poz, premik))
+            # 2 gor. tu zagotovo ni promocije
+            premik = koord_premik(poz, 0, 2)
+            if self.figura_na_poz(premik) == None and premik != None:
+                if koord_y(premik) == (2 if self.barva else 7):
+                    list_potez.append(Poteza(poz, premik))
+        return list_potez
+
+    # Generacija bitboarda napadenih potez
+    def gen_napadalne_poteze(self, barva):
+        list_potez = []
+        fig_indeks = TIPI_FIGUR["w_k"] if barva else TIPI_FIGUR["b_k"]
+        premik = 0
+
+        # K; v vse smeri
+        poz_list = najdi_figure(self.figure[fig_indeks])
+        for x in (-1, 0, 1):
+            for y in (-1, 0, 1):
+                premik = koord_premik(poz_list[0], x, y)
+                if not (x == 0 and y == 0) and premik != None:
+                    list_potez.append(Poteza(poz_list[0], premik))
+        # Drseči. Barva bo nasprotnikova
+        list_potez += self.gen_drseči(barva)
+        # N
+        list_potez += self.gen_skakac(barva)
+        # P
+        poz_list = najdi_figure(self.figure[TIPI_FIGUR["w_p" if barva else "b_p"]])
+        for poz in poz_list:
+            # Napada lahko samo po diagonali
             for x in (-1, 1):
                 premik = koord_premik(poz, x, 1)
                 if premik != None:
-                    list_premikov.append(premik)
-        # Mergamo ta seznam napadenih pozicij v bitboard
-        self.napadeni = 0
-        for poz in list_premikov:
-            self.napadeni = b_or(self.napadeni, poz)
-        return list_premikov
+                    list_potez.append(Poteza(poz, premik))
+        return list_potez
 
     # Generacija legalnih potez
     def gen_legalne_poteze(self):
         self.legalne_poteze = []
-        napadeni = self.gen_napadene_poz()
-        check = 0
+        nap_poteze = self.gen_napadalne_poteze(not self.barva)
+        # Mergamo ta seznam napadenih pozicij v bitboard
+        self.napadeni = 0
+        for poteza in nap_poteze:
+            self.napadeni = b_or(self.napadeni, poteza.do)
+
+        # Pinane figure
+
         # K
         poz_list = najdi_figure(self.figure[TIPI_FIGUR["w_k"] 
                                 if self.barva == BELI
                                 else self.figure[TIPI_FIGUR["b_k"]])
         poz_kralj = poz_list[0]
+        # Poteze kralja
         for x in (-1, 0, 1):
             for y in (-1, 0, 1):
                 premik = koord_premik(poz_kralj, x, y)
@@ -352,19 +393,43 @@ class Plosca:
                             self.figura_na_poz(premik) not in 
                             range(1 if self.barva else 7, 6 if self.barva else 12)):
                         self.legalne_poteze.append(self.prilagodi_potezo(Poteza(poz_kralj, premik)))
-        # Ali je šah. Preštejemo število napadalcev polja kralja
-        for poz in napadeni:
-            if poz == poz_kralj:
-                check += 1
+        # Ali je šah. Shranimo napadalce polja kralja
+        check_poteze = []
+        for poteza in nap_poteze:
+            if poteza.do == poz_kralj:
+                check_poteze.append(poteza)
+
         self.check = True
-        # Dvojni šah. legalne so samo poteze kralja, 
-        # saj nobena figura ne more zajeti več kot ene na enkrat
-        if check > 1:
+        if len(check_poteze) > 1:
+            # Dvojni šah. Legalne so samo poteze kralja, 
+            # saj nobena figura ne more zajeti več kot ene na enkrat
             # Smo že obravnavali te poteze, torej samo končamo postopek
             return
-        elif check == 1:
+        elif len(check_poteze) == 1:
+            # Katera figura daje šah
+            poz_napad = check_poteze[0].od
+            # Ali je drseča
+            poz_vmes = []
+            if je_fig_drseca(self.figura_na_poz(poz_napad)):
+                poz_vmes = ray_cast(poz_napad, poz_kralj)
             
-        else:
-            self.check = False
+            potencialne_poteze = self.gen_napadalne_poteze(self.barva)
+            # Dodamo še gibanje kmetov, ki niso napadalne poteze
+            potencialne_poteze += self.gen_kmet_potisk(self.bela)
+            potencialne_poteze = [self.prilagodi_potezo(poteza) for poteza in potencialne_poteze]
+
+            # Dodamo poteze, ki zajamejo napadalno figuro,
+            # ali pa blokirajo napad, če je napadalna drseča
+            for poteza in potencialne_poteze:
+                # TODO: PINANE FIGURE NISO VELJAVNE!!!
+                if poteza.je_zajem():
+                    if poteza.poz_zajete_fig == poz_napad:
+                        self.legalne_poteze.append(poteza)
+                if poteza.do in poz_vmes:
+                    self.legalne_poteze.append(poteza)
+            return
+        self.check = False
+
+        # Ostale poteze
         
         
