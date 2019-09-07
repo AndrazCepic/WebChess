@@ -276,7 +276,7 @@ class Plosca:
         return list_premiki
 
     # Generacija potez drsečih figur za barvo
-    def gen_drseči(self, barva):
+    def gen_drseci(self, barva):
         list_potez = []
         fig_indeks = TIPI_FIGUR["w_q" if barva else "b_q"]
         # Q
@@ -354,7 +354,7 @@ class Plosca:
                 if not (x == 0 and y == 0) and premik != None:
                     list_potez.append(Poteza(poz_list[0], premik))
         # Drseči. Barva bo nasprotnikova
-        list_potez += self.gen_drseči(barva)
+        list_potez += self.gen_drseci(barva)
         # N
         list_potez += self.gen_skakac(barva)
         # P
