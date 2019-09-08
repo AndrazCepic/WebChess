@@ -9,6 +9,28 @@ def sign_v_unsign(x):
 # 0x8000000000000000
 MSB = sign_v_unsign(int("0x8000000000000000", 0))
 
+# Wrapper osnovnih binarnih operacij,
+# da ni povsod klicanja sign_v_unsign drugje
+def b_and(x, y):
+    return sign_v_unsign(x & y)
+
+def b_or(x, y)
+    return sign_v_unsign(x | y)
+
+def b_not(x):
+    return sign_v_unsign(~x)
+
+# Shift desno za x mest: stev >> x
+def b_shift_d(stev, x):
+    return sign_v_unsign(stev >> x)
+
+# Shift levo za x mest: stev << x
+def b_shift_l(stev, x):
+    return sign_v_unsign(stev << x)
+
+def je_v_bitb(bitb, poz):
+    return b_and(bitb, poz) != 0
+
 def koord_v_bit(x, y):
     # MSB je pozicija a1. 
     # X narašča v desno. SHIFT desno za x
@@ -16,27 +38,35 @@ def koord_v_bit(x, y):
     # saj y vrstic gor, vsaka ta pa je 8 bitov
     return sign_v_unsign((MSB >> x) >> y*8)
 
+# Maski za koordinati
+x_maska = 0
+y_maska = 0
+for i in range(8):
+    x_maska = b_or(x_maska, koord_v_bit(0, i))
+    y_maska = b_or(y_maska, koord_v_bit(i, 0))
+
 @lru_cache(maxsize=None)
 def koord_y(poz):
-    count = 0
-    while poz != 0:
-        poz = sign_v_unsign(poz << 8)
-        count += 1
-    return count
+    y = 0
+    y_maska_it = y_maska
+    while not je_v_bitb(y_maska_it, poz):
+        y_maska_it = b_shift_d(y_maska_it, 8)
+        y += 1
+    return y
     
 @lru_cache(maxsize=None)
 def koord_x(poz):
-    count = 0
-    y = koord_y(poz)
-    while koord_y(poz) == y:
-        poz = sign_v_unsign(poz << 1)
-        count += 1
-    return count
+    x = 0
+    x_maska_it = x_maska
+    while not je_v_bitb(x_maska_it, poz):
+        x_maska_it = b_shift_d(x_maska_it, 1)
+        x += 1
+    return x
 
 @lru_cache(maxsize=None)
 def koord_premik(poz, x, y):
-    if (koord_x(poz) + x not in range(8)) or
-       (koord_y(poz) + y) not in range(8)):
+    if ((koord_x(poz) + x not in range(8)) or
+       (koord_y(poz) + y) not in range(8))):
        return None
     if x >= 0:
         if y >= 0:
@@ -68,25 +98,3 @@ def ray_cast(od, do):
         ray_poz = b_or(ray_poz, poz)
         poz = koord_premik(poz, dir_x, dir_y)
     return ray_poz
-
-# Wrapper osnovnih binarnih operacij,
-# da ni povsod klicanja sign_v_unsign drugje
-def b_and(x, y):
-    return sign_v_unsign(x & y)
-
-def b_or(x, y)
-    return sign_v_unsign(x | y)
-
-def b_not(x):
-    return sign_v_unsign(~x)
-
-# Shift desno za x mest: stev >> x
-def b_shift_d(stev, x):
-    return sign_v_unsign(stev >> x)
-
-# Shift levo za x mest: stev << x
-def b_shift_l(stev, x):
-    return sign_v_unsign(stev << x)
-
-def je_v_bitb(bitb, poz):
-    return b_and(bitb, poz) != 0

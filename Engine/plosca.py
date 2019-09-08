@@ -93,7 +93,14 @@ class Plosca:
 
         # Napadene pozicije na šahovnici 
         self.napadeni = 0
+
+        # Ali je šah
         self.check = False
+
+        # Potrebujemo za rokado
+        self.kralj_stevilo_prem = [0, 0]
+        self.trd_q_stevilo_prem = [0, 0]
+        self.trd_k_stevilo_prem = [0, 0]
 
     # Vrne indeks tipa figure na poziciji ali None, če ni figure.
     # Argument je bitna pozicija
@@ -120,14 +127,17 @@ class Plosca:
 
     # Prebere potezo in osveži podatke šahovnice
     def zabelezi_potezo(self, poteza):
+        # Figura, ki se premika
+        fig = self.figura_na_poz(poteza.od)
+
         if poteza.je_zajem():
             zajeti_poz = poteza.do
             if poteza.je_en_passant():
                 # BELI: Zajeti kmet je 1 dol pod destinacijo kmeta (shift levo)
                 # CRNI: Zajeti kmet je 1 gor nad destinacijo kmeta (shift desno)
-                zajeti_poz = b_shift_l(poteza.do, 8) 
+                zajeti_poz = (koord_premik(poteza.do, -1) 
                                 if self.barva == BELI 
-                                else b_shift_d(poteza.do, 8)
+                                else koord_premik(poteza.do, -1))
             
             # Zabeležimo kateri tip figure je bil zajet
             for i in range(12):
@@ -174,6 +184,7 @@ class Plosca:
                             if je_v_bitb(bitb, poteza.od)
                             else bitb
                             for bitb in self.figure]
+        self.barva = not self.barva
         self.zgod_potez.append(poteza)
 
     # Razveljavi zadnjo zabeleženo potezo iz bitboarda
@@ -189,9 +200,9 @@ class Plosca:
             if poteza.je_en_passant():
                 # BELI: Zajeti kmet je 1 dol pod destinacijo kmeta (shift levo)
                 # CRNI: Zajeti kmet je 1 gor nad destinacijo kmeta (shift desno)
-                zajeti_poz = b_shift_l(poteza.do, 8) 
-                                if barva == BELI 
-                                else b_shift_d(poteza.do, 8)
+                zajeti_poz = (koord_premik(poteza.do, -1) 
+                              if barva == BELI 
+                              else koord_premik(poteza.do, 1))
             self.figure[poteza.tip_zajete_fig] = b_or(self.figure[poteza.tip_zajete_fig], 
                                                       zajeti_poz)
         
@@ -247,9 +258,9 @@ class Plosca:
         # Kralj
         if tip in (TIPI_FIGUR["w_k"], TIPI_FIGUR["b_k"]):
             # Rokada; razlika v x je 2
-            if poteza.do == b_shift_d(poteza.od, 2):
+            if poteza.do == koord_premik(poteza.od, 2, 0):
                 poteza.flags = Poteza.ROKADA_K
-            elif poteza.do == b_shift_l(poteza.od, 2):
+            elif poteza.do == koord_premik(poteza.od, -2, 0):
                 poteza.flags = Poteza.ROKADA_Q
         # Zajemi
         tip_fig_dest = self.figura_na_poz(poteza.do)
@@ -325,18 +336,18 @@ class Plosca:
         poz_list = najdi_figure(self.figure[TIPI_FIGUR["w_p" if barva else "b_p"]])
         for poz in poz_list:
             # 1 gor
-            premik = koord_premik(poz, 0, 1)
+            premik = koord_premik(poz, 0, 1 if barva else -1)
             if self.figura_na_poz(premik) == None and premik != None:
                 # Še promocija
-                if koord_y == (7 if barva else 1):
+                if koord_y(premik) == (7 if barva else 0):
                     for i in range(4):
                         list_potez.append(Poteza(poz, premik, PROMOCIJA | i))
                 else:
                     list_potez.append(Poteza(poz, premik))
             # 2 gor. tu zagotovo ni promocije
-            premik = koord_premik(poz, 0, 2)
+            premik = koord_premik(poz, 0, 2 if barva else -2)
             if self.figura_na_poz(premik) == None and premik != None:
-                if koord_y(premik) == (2 if self.barva else 7):
+                if koord_y(premik) == (1 if self.barva else 6):
                     list_potez.append(Poteza(poz, premik))
         return list_potez
 
@@ -362,7 +373,7 @@ class Plosca:
         for poz in poz_list:
             # Napada lahko samo po diagonali
             for x in (-1, 1):
-                premik = koord_premik(poz, x, 1)
+                premik = koord_premik(poz, x, 1 if barva else -1)
                 if premik != None:
                     list_potez.append(Poteza(poz, premik))
         return list_potez
@@ -375,6 +386,12 @@ class Plosca:
         self.napadeni = 0
         for poteza in nap_poteze:
             self.napadeni = b_or(self.napadeni, poteza.do)
+
+        # Potencialne poteze za figure, ki niso kralj
+        potencialne_poteze = self.gen_napadalne_poteze(self.barva)
+        # Dodamo še gibanje kmetov, ki niso napadalne poteze
+        potencialne_poteze += self.gen_kmet_potisk(self.bela)
+        potencialne_poteze = [self.prilagodi_potezo(poteza) for poteza in potencialne_poteze]
 
         # Pinane figure
 
@@ -412,11 +429,6 @@ class Plosca:
             poz_vmes = 0
             if je_fig_drseca(self.figura_na_poz(poz_napad)):
                 poz_vmes = ray_cast(poz_napad, poz_kralj)
-            
-            potencialne_poteze = self.gen_napadalne_poteze(self.barva)
-            # Dodamo še gibanje kmetov, ki niso napadalne poteze
-            potencialne_poteze += self.gen_kmet_potisk(self.bela)
-            potencialne_poteze = [self.prilagodi_potezo(poteza) for poteza in potencialne_poteze]
 
             # Dodamo poteze, ki zajamejo napadalno figuro,
             # ali pa blokirajo napad, če je napadalna drseča
@@ -430,6 +442,8 @@ class Plosca:
             return
         self.check = False
 
-        # Ostale poteze
+        # Rokada
+        if self.rokada_dovoljena[0 if self.barva else 1]:
+            
         
         
