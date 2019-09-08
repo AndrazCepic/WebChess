@@ -10,15 +10,6 @@ ZAJEM = int("0b0100", 2)
 PROMOCIJA = int("0b1000", 2)
 FIGURE_P = int("0b0011", 2)
 
-#PROM_Q = int("0b1000", 2)
-#PROM_R = int("0b1001", 2)
-#PROM_B = int("0b1010", 2)
-#PROM_N = int("0b1011", 2)
-#PROM_ZAJEM_Q = int("0b1100", 2)
-#PROM_ZAJEM_R = int("0b1101", 2)
-#PROM_ZAJEM_B = int("0b1110", 2)
-#PROM_ZAJEM_N = int("0b1111", 2)
-
 # String oznake za figure pri promociji
 PROM_STR = {"q" : 0, "r" : 1, "b" : 2, "n" : 3}
 
@@ -29,6 +20,7 @@ class Poteza:
         self.flags = flags
         self.tip_zajete_fig = None
         self.poz_zajete_fig = None
+        self.spremeni_pravice_rokade = [False, False, False, False]
 
     def je_promocija(self):
         return (self.flags & PROMOCIJA) != 0

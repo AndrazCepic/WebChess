@@ -98,9 +98,11 @@ class Plosca:
         self.check = False
 
         # Potrebujemo za rokado
-        self.kralj_stevilo_prem = [0, 0]
-        self.trd_q_stevilo_prem = [0, 0]
-        self.trd_k_stevilo_prem = [0, 0]
+        # 0 - beli kraljeva
+        # 1 - beli damina
+        # 2 - črni kraljeva
+        # 3 - črni damina
+        self.pravice_rokade = [True, True, True, True]
 
     # Vrne indeks tipa figure na poziciji ali None, če ni figure.
     # Argument je bitna pozicija
@@ -130,11 +132,31 @@ class Plosca:
         # Figura, ki se premika
         fig = self.figura_na_poz(poteza.od)
 
+        # Pravice rokade
+        if fig == (TIPI_FIGUR["w_k"] if self.barva else TIPI_FIGUR["b_k"]):
+            if self.pravice_rokade[0 if self.barva else 2]:
+                poteza.spremeni_pravice_rokade[0 if self.barva else 2] = True
+            if self.pravice_rokade[1 if self.barva else 3]:
+                poteza.spremeni_pravice_rokade[1 if self.barva else 3] = True        
+            self.pravice_rokade[0 if self.barva else 2] = False
+            self.pravice_rokade[1 if self.barva else 3] = False
+        if fig == (TIPI_FIGUR["w_r"] if self.barva else TIPI_FIGUR["b_r"]):
+            # Kraljeva stran
+            if poteza.od == koord_v_bit(7, 0 if self.barva else 7):
+                if self.pravice_rokade[0 if self.barva else 2]:
+                    poteza.spremeni_pravice_rokade[0 if self.barva else 2] = True
+                self.pravice_rokade[0 if self.barva else 2] = False
+            # Damina stran
+            if poteza.od == koord_v_bit(0, 0 if self.barva else 7):
+                if self.pravice_rokade[0 if self.barva else 2]:
+                    poteza.spremeni_pravice_rokade[0 if self.barva else 2] = True
+                self.pravice_rokade[0 if self.barva else 2] = False
+
         if poteza.je_zajem():
             zajeti_poz = poteza.do
             if poteza.je_en_passant():
-                # BELI: Zajeti kmet je 1 dol pod destinacijo kmeta (shift levo)
-                # CRNI: Zajeti kmet je 1 gor nad destinacijo kmeta (shift desno)
+                # BELI: Zajeti kmet je 1 dol pod destinacijo kmeta
+                # CRNI: Zajeti kmet je 1 gor nad destinacijo kmeta
                 zajeti_poz = (koord_premik(poteza.do, -1) 
                                 if self.barva == BELI 
                                 else koord_premik(poteza.do, -1))
@@ -163,15 +185,15 @@ class Plosca:
             # Kraljeva stran
             # Trdnjava je 1 desno od destinacije kralja
             # Premakne se pa 1 levo od destinacije kralja
-            trdnjava_poz_od = b_shift_d(poteza.do, 1)
-            trdnjava_poz_do = b_shift_l(poteza.do, 1)
+            trdnjava_poz_od = koord_premik(poteza.do, 1, 0)
+            trdnjava_poz_do = koord_premik(poteza.do, -1, 0)
 
             if poteza.flags == Poteza.ROKADA_Q:
                 # Damina stran; popravek
                 # Trdnjava je 2 levo od destinacije kralja
                 # Premakne se pa 1 desno od destinacije kralja
-                trdnjava_poz_od = b_shift_l(poteza.do, 2)
-                trdnjava_poz_do = b_shift_d(poteza.do, 1)
+                trdnjava_poz_od = koord_premik(poteza.do, -2, 0)
+                trdnjava_poz_do = koord_premik(poteza.do, 1, 0)
 
             self.figure = [b_or(b_and(bitb, b_not(poteza.od)),poteza.do)
                         if je_v_bitb(bitb, poteza.od)
@@ -194,12 +216,17 @@ class Plosca:
         # Trenutna barva na vrsti(self.barva) je obratna od zadnje poteze
         barva = not self.barva
 
+        # Pravice rokade
+        for i in range(len(poteza.spremeni_pravice_rokade)):
+            if poteza.spremeni_pravice_rokade[i]:
+                self.pravice_rokade[i] = True
+
         # Zapišemo pobrisano figuro nazaj v bitboard
         if poteza.je_zajem():
             zajeti_poz = poteza.do
             if poteza.je_en_passant():
-                # BELI: Zajeti kmet je 1 dol pod destinacijo kmeta (shift levo)
-                # CRNI: Zajeti kmet je 1 gor nad destinacijo kmeta (shift desno)
+                # BELI: Zajeti kmet je 1 dol pod destinacijo kmeta
+                # CRNI: Zajeti kmet je 1 gor nad destinacijo kmeta
                 zajeti_poz = (koord_premik(poteza.do, -1) 
                               if barva == BELI 
                               else koord_premik(poteza.do, 1))
@@ -217,36 +244,36 @@ class Plosca:
             # Kraljeva stran
             # Trdnjava je 1 desno od destinacije kralja
             # Premakne se pa 1 levo od destinacije kralja
-            trdnjava_poz_od = b_shift_d(poteza.do, 1)
-            trdnjava_poz_do = b_shift_l(poteza.do, 1)
+            trdnjava_poz_od = koord_premik(poteza.do, 1, 0)
+            trdnjava_poz_do = koord_premik(poteza.do, -1, 0)
 
             if poteza.flags == Poteza.ROKADA_Q:
                 # Damina stran; popravek
                 # Trdnjava je 2 levo od destinacije kralja
                 # Premakne se pa 1 desno od destinacije kralja
-                trdnjava_poz_od = b_shift_l(poteza.do, 2)
-                trdnjava_poz_do = b_shift_d(poteza.do, 1)
+                trdnjava_poz_od = koord_premik(poteza.do, -2, 0)
+                trdnjava_poz_do = koord_premik(poteza.do, 1, 0)
 
                 self.figure = [b_or(b_and(bitb, b_not(poteza.do)), poteza.od)
-                            if je_v_bitb(bitb, poteza.do)
-                            else b_or(b_and(bitb, b_not(trdnjava_poz_do)), trdnjava_poz_od)
-                            if je_v_bitb(bitb, trdnjava_poz_do)
-                            else bitb
-                            for bitb in self.figure]
+                               if je_v_bitb(bitb, poteza.do)
+                               else b_or(b_and(bitb, b_not(trdnjava_poz_do)), trdnjava_poz_od)
+                               if je_v_bitb(bitb, trdnjava_poz_do)
+                               else bitb
+                               for bitb in self.figure]
         else:
             self.figure = [b_or(b_and(bitb, b_not(poteza.do)),poteza.od)
-                                if je_v_bitb(bitb, poteza.do)
-                                else bitb
-                                for bitb in self.figure]
+                           if je_v_bitb(bitb, poteza.do)
+                           else bitb
+                           for bitb in self.figure]
+        self.barva = not self.barva
 
     # Nastavimo dodatne info glede na trenutno igro
     def prilagodi_potezo(self, poteza):
         tip = self.figura_na_poz(poteza.od)
-        
         # Kmet
         if tip in (TIPI_FIGUR["w_p"], TIPI_FIGUR["b_p"]):
             # Dvojni premik kmeta; razlika v y je 2
-            if poteza.do in (b_shift_d(poteza.od, 16), b_shift_l(poteza.od, 16)):
+            if poteza.do in (koord_premik(poteza.od, 0, 2), koord_premik(poteza.od, 0, -2)):
                 poteza.flags = Poteza.DVOJNI_KMET
             # En Passant
             # Kmet eno nad ali pod tistim, ki se je prej premaknil za 2
@@ -255,6 +282,7 @@ class Plosca:
                                  koord_premik(self.zgod_potez[-1].do, 0, 1)):
                     poteza.flags = Poteza.EN_PASSANT
                     poteza.poz_zajete_fig = self.zgod_potez[-1].do
+                    poteza.tip_zajete_fig = TIPI_FIGUR["b_p"] if self.barva else TIPI_FIGUR["b_p"] 
         # Kralj
         if tip in (TIPI_FIGUR["w_k"], TIPI_FIGUR["b_k"]):
             # Rokada; razlika v x je 2
@@ -382,7 +410,7 @@ class Plosca:
     def gen_legalne_poteze(self):
         self.legalne_poteze = []
         nap_poteze = self.gen_napadalne_poteze(not self.barva)
-        # Mergamo ta seznam napadenih pozicij v bitboard
+        # Zravnamo ta seznam napadenih pozicij v bitboard
         self.napadeni = 0
         for poteza in nap_poteze:
             self.napadeni = b_or(self.napadeni, poteza.do)
@@ -391,9 +419,11 @@ class Plosca:
         potencialne_poteze = self.gen_napadalne_poteze(self.barva)
         # Dodamo še gibanje kmetov, ki niso napadalne poteze
         potencialne_poteze += self.gen_kmet_potisk(self.bela)
+        # Prilagodimo poteze
         potencialne_poteze = [self.prilagodi_potezo(poteza) for poteza in potencialne_poteze]
 
-        # Pinane figure
+        # Odstranimo pinane figure
+        # TODO
 
         # K
         poz_list = najdi_figure(self.figure[TIPI_FIGUR["w_k"] 
@@ -442,8 +472,44 @@ class Plosca:
             return
         self.check = False
 
-        # Rokada
-        if self.rokada_dovoljena[0 if self.barva else 1]:
-            
-        
-        
+        # Rokada - kraljeva stran
+        if self.rokada_dovoljena[0 if self.barva else 2]:
+            poz_1 = koord_premik(poz_kralj, 1, 0)
+            poz_2 = koord_premik(poz_kralj, 2, 0)
+            if (self.figura_na_poz(poz_1) == None and
+                self.figura_na_poz(poz_2) == None):
+                # Preverimo, če sta poziciji napadeni
+                if (not je_v_bitb(self.napadeni, poz_1) and
+                    not je_v_bitb(self.napadeni, poz_2)):
+                    self.legalne_poteze.append(self.prilagodi_potezo(Poteza(poz_kralj, poz_2)))
+        # Rokada - damina stran
+        if self.rokada_dovoljena[1 if self.barva else 3]:
+            poz_1 = koord_premik(poz_kralj, -1, 0)
+            poz_2 = koord_premik(poz_kralj, -2, 0)
+            if (self.figura_na_poz(poz_1) == None and
+                self.figura_na_poz(poz_2) == None):
+                # Preverimo, če sta poziciji napadeni
+                if (not je_v_bitb(self.napadeni, poz_1) and
+                    not je_v_bitb(self.napadeni, poz_2)):
+                    self.legalne_poteze.append(self.prilagodi_potezo(Poteza(poz_kralj, poz_2)))
+
+        # Ostale poteze; Zajemi veljajo le, če je zajeta figura tuja
+        for poteza in potencialne_poteze:
+            if poteza.od == poz_kralj:
+                # Kralja smo že obravnavali
+                continue
+            if poteza.je_zajem():
+                if poteza.tip_zajete_fig in range(0 if self.barva else 6, 
+                                                  6 if self.barva else 12):
+                    # Spustimo poteze, ki so zajemi svoje barve
+                    continue
+            if (self.figura_na_poz(poteza.od) == 
+               (TIPI_FIGUR["w_p"] if self.barva else TIPI_FIGUR["b_p"])):
+                if not poteza.je_en_passant():
+                    if self.figura_na_poz(poteza.do) == None:
+                        if poteza.do not in (koord_premik(poteza.od, 0, 1 if self.barva else -1), 
+                                             koord_premik(poteza.od, 0, 2 if self.barva else -2)):
+                            # Kmet se je premaknil po diagonali, vendar ni zajem,
+                            # zato ga izpustimo
+                            continue
+            self.legalne_poteze.append(poteza)
