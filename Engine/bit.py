@@ -31,6 +31,12 @@ def b_shift_l(stev, x):
 def je_v_bitb(bitb, poz):
     return b_and(bitb, poz) != 0
 
+def odstrani_iz_bitb(bitb, poz):
+    return b_and(bitb, b_not(poz))
+
+def zapisi_v_bitb(bitb, poz):
+    return b_or(bitb, poz)
+
 def koord_v_bit(x, y):
     # MSB je pozicija a1. 
     # X narašča v desno. SHIFT desno za x
@@ -82,7 +88,7 @@ def koord_premik(poz, x, y):
 def koord_poz(poz):
     return (koord_x(poz), koord_y(poz))
 
-# Žarek med figurama. vrne pozicije med pozicijama
+# Žarek med figurama. Vrne pozicije med pozicijama
 # Deluje diagonalno, horizontalno ali pa vertikalno
 @lru_cache(maxsize=None)
 def ray_cast(od, do):
@@ -90,11 +96,15 @@ def ray_cast(od, do):
     x2, y2 = koord_poz(do)
     dif_x = x2 - x1
     dif_y = y2 - y1
+    if not (abs(dif_x)==abs(dif_y) or dif_x == 0 or dif_y == 0):
+        # Ni diagonala, horizontala ali pa vertikala 
+        return []
+
     dir_x = 1 if dif_x > 0 else 0 if dif_x = 0 else -1 if dif_x < 0
     dir_y = 1 if dif_y > 0 else 0 if dif_y = 0 else -1 if dif_y < 0
     ray_poz = 0
     poz = koord_premik(od, dir_x, dir_y)
     while poz != do:
-        ray_poz = b_or(ray_poz, poz)
+        ray_poz = zapisi_v_bitb(ray_poz, poz)
         poz = koord_premik(poz, dir_x, dir_y)
     return ray_poz

@@ -300,7 +300,7 @@ class Plosca:
 
     # Generacija premikov za drseče figure(Q, R, B). Spustimo kralja
     # To so žarki v različne smeri podane z argumenti
-    def gen_ray(self, zac_poz, dir_x, dir_y, barva):
+    def gen_ray(self, zac_poz, dir_x, dir_y):
         poz = koord_premik(zac_poz, dir_x, dir_y)
         tip_figure = self.figura_na_poz(poz)
         list_premiki = []
@@ -310,7 +310,7 @@ class Plosca:
             poz = koord_premik(zac_poz, dir_x, dir_y)
             tip_figure = self.figura_na_poz(poz)
         # Dodamo zadnjega, ki je na šahovnici; ni prazen
-        if pot != None:
+        if poz != None:
             list_premiki.append(poz)
         return list_premiki
 
@@ -326,7 +326,7 @@ class Plosca:
                     # Vse smeri
                     if not (x == 0 and y == 0):
                         list_potez += [Poteza(poz, poz_do) 
-                                       for poz_do in self.gen_ray(poz, x, y, barva)]
+                                       for poz_do in self.gen_ray(poz, x, y)]
         # R
         fig_indeks += 1
         poz_list = najdi_figure(self.figure[fig_indeks])
@@ -336,7 +336,7 @@ class Plosca:
                     # Samo hor. vert. smeri, torej en je 0
                     if not (x == 0 and y == 0) and (x == 0 or y == 0):
                         list_potez += [Poteza(poz, poz_do) 
-                                       for poz_do in self.gen_ray(poz, x, y, barva)]
+                                       for poz_do in self.gen_ray(poz, x, y)]
         # B
         fig_indeks += 1
         poz_list = najdi_figure(self.figure[fig_indeks])
@@ -346,7 +346,7 @@ class Plosca:
                     # Samo diag, torej oba razlicna od 0
                     if x != 0 and y != 0:
                         list_potez += [Poteza(poz, poz_do) 
-                                       for poz_do in self.gen_ray(poz, x, y, barva)]
+                                       for poz_do in self.gen_ray(poz, x, y)]
         return list_potez
 
     # Poteze skakačev
@@ -416,7 +416,7 @@ class Plosca:
         # Zravnamo ta seznam napadenih pozicij v bitboard
         self.napadeni = 0
         for poteza in nap_poteze:
-            self.napadeni = b_or(self.napadeni, poteza.do)
+            self.napadeni = zapisi_v_bitb(self.napadeni, poteza.do)
 
         # Potencialne poteze za figure, ki niso kralj
         potencialne_poteze = self.gen_napadalne_poteze(self.barva)
@@ -425,15 +425,87 @@ class Plosca:
         # Prilagodimo potencialne poteze
         potencialne_poteze = [self.prilagodi_potezo(poteza) for poteza in potencialne_poteze]
 
-        # Odstranimo pinane figure
-        # TODO
-        
-
         # K
         poz_list = najdi_figure(self.figure[TIPI_FIGUR["w_k"] 
-                                if self.barva == BELI
+                                if self.barva
                                 else self.figure[TIPI_FIGUR["b_k"]])
         poz_kralj = poz_list[0]
+
+        # Odstranimo pinane figure
+        # TODO
+        # Filtriramo napade drsečih figur
+        ray_cast_nasp = 0
+        for pot in nap_poteze:
+            # Je drseča, ki napada
+            if self.figura_na_poz(pot.od) in range(TIPI_FIGUR["b_q"] if self.barva 
+                                                   else TIPI_FIGUR["w_q"], 
+                                                   TIPI_FIGUR["b_b"] if self.barva 
+                                                   else TIPI_FIGUR["w_b"]):
+                # Ali je med kraljem in to figuro
+                if pot.do in ray_cast(pot.od, poz_kralj):
+                    ray_cast_nasp = zapisi_v_bitb(ray_cast_nasp, pot.do)
+        # Žarek kralja v vse smeri
+        ray_cast_kralj = [poz for dx in (1, 0, -1)
+                              for dy in (1, 0, -1)
+                              for poz in gen_ray(poz_kralj, dx, dy)
+                              if not (dx == 0 and dy == 0)]
+        # Bitboard žarkov kralja
+        ray_cast_kralj_bitb = 0
+        for poz in ray_cast_kralj:
+                ray_cast_kralj_bitb = zapisi_v_bitb(ray_cast_kralj_bitb, poz)
+        # Pinane figure so na pozicijah, kjer se žarka napadalnih figur in od kralja sekata
+        pin_bitb = b_and(ray_kralj_bitb, ray_cast_nasp)
+
+        # Lahko se zgodi, da je presek dveh žarkov kar žarek, kadar je šah,
+        # kar pa se lahko zgodi le natanko tedaj, ko so ta polja None,
+        # zato še odstranimo polja iz pin_bitb, ki so None
+        pin_poz = najdi_figure(pin_bitb)
+        for poz in pin_poz:
+            if self.figura_na_poz(poz) == None:
+                pin_bitb = odstrani_iz_bitb(pin_bitb, poz)
+        pin_poz = najdi_figure(pin_bitb)
+
+        # Odstranimo pinano figuro iz bitboarda in ray castamo od kralja v smeri te figure,
+        # da dobimo možne legalne poteze pinane figure
+        neveljavne_pot = []
+        # Odstranitev pin_bitb iz vseh bitboardov za ray cast od kralja
+        temp_fig = [bitb for bitb in self.figure]
+        self.figure = [odstrani_iz_bitb(bitb, pin_bitb)
+                       for bitb in self.figure]
+        for poz in pin_poz:
+            # Ray cast od kralja
+            x1, y1 = koord_poz(poz_kralj)
+            x2, y2 = koord_poz(poz)
+            dif_x = x2 - x1
+            dif_y = y2 - y1
+            dir_x = 1 if dif_x > 0 else 0 if dif_x = 0 else -1 if dif_x < 0
+            dir_y = 1 if dif_y > 0 else 0 if dif_y = 0 else -1 if dif_y < 0
+            ray = self.gen_ray(poz_kralj, dir_x, dir_y)
+
+            # Neveljavne poteze iz potencialnih potez
+            for pot in potencialne_poteze:                
+                if pot.od == poz and pot.do not in ray:
+                    neveljavne_pot.append(pot)
+
+        # Odstranimo še En Passant poteze,
+        # ki jih algoritem za pin ne zazna
+        for pot in potencialne_poteze:
+            if pot.je_en_passant():
+                # Tak en passant je odkrit napad na kralja
+                if (je_v_bitb(ray_cast_nasp, pot.poz_zajete_fig) and
+                    je_v_bitb(ray_cast_kralj_bitb, pot.od)):
+                    neveljavne_pot.append(pot)
+                if (je_v_bitb(ray_cast_nasp, pot.od) and
+                    je_v_bitb(ray_cast_kralj_bitb, pot.poz_zajete_fig)):
+                    neveljavne_pot.append(pot)    
+
+        # Vrnitev figur v prvotno stanje
+        self.figure = temp_fig
+
+        # Odstranimo neveljavne poteze iz potencialnih
+        potencialne_poteze = [pot for pot in potencialne_poteze 
+                              if pot not in neveljavne_pot]
+
         # Poteze kralja
         for x in (-1, 0, 1):
             for y in (-1, 0, 1):
