@@ -92,7 +92,7 @@ def ray_cast(od, do):
     dif_y = y2 - y1
     dir_x = 1 if dif_x > 0 else 0 if dif_x = 0 else -1 if dif_x < 0
     dir_y = 1 if dif_y > 0 else 0 if dif_y = 0 else -1 if dif_y < 0
-    ray_poz
+    ray_poz = 0
     poz = koord_premik(od, dir_x, dir_y)
     while poz != do:
         ray_poz = b_or(ray_poz, poz)

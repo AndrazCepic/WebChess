@@ -325,7 +325,8 @@ class Plosca:
                 for y in (-1, 0, 1):
                     # Vse smeri
                     if not (x == 0 and y == 0):
-                        list_potez += [Poteza(poz, poz_do) for poz_do in self.gen_ray(poz, x, y, barva)]
+                        list_potez += [Poteza(poz, poz_do) 
+                                       for poz_do in self.gen_ray(poz, x, y, barva)]
         # R
         fig_indeks += 1
         poz_list = najdi_figure(self.figure[fig_indeks])
@@ -334,7 +335,8 @@ class Plosca:
                 for y in (-1, 0, 1):
                     # Samo hor. vert. smeri, torej en je 0
                     if not (x == 0 and y == 0) and (x == 0 or y == 0):
-                        list_potez += [Poteza(poz, poz_do) for poz_do in self.gen_ray(poz, x, y, barva)]
+                        list_potez += [Poteza(poz, poz_do) 
+                                       for poz_do in self.gen_ray(poz, x, y, barva)]
         # B
         fig_indeks += 1
         poz_list = najdi_figure(self.figure[fig_indeks])
@@ -343,7 +345,8 @@ class Plosca:
                 for y in (-1, 0, 1):
                     # Samo diag, torej oba razlicna od 0
                     if x != 0 and y != 0:
-                        list_potez += [Poteza(poz, poz_do) for poz_do in self.gen_ray(poz, x, y, barva)]
+                        list_potez += [Poteza(poz, poz_do) 
+                                       for poz_do in self.gen_ray(poz, x, y, barva)]
         return list_potez
 
     # Poteze skakačev
@@ -419,11 +422,12 @@ class Plosca:
         potencialne_poteze = self.gen_napadalne_poteze(self.barva)
         # Dodamo še gibanje kmetov, ki niso napadalne poteze
         potencialne_poteze += self.gen_kmet_potisk(self.bela)
-        # Prilagodimo poteze
+        # Prilagodimo potencialne poteze
         potencialne_poteze = [self.prilagodi_potezo(poteza) for poteza in potencialne_poteze]
 
         # Odstranimo pinane figure
         # TODO
+        
 
         # K
         poz_list = najdi_figure(self.figure[TIPI_FIGUR["w_k"] 
