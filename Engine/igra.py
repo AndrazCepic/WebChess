@@ -12,17 +12,44 @@ class Igra:
               "pat" : 3}
 
     def __init__(self):
-        # Stanje igre
-        self.stanje_igre = STANJA["v_teku"]
-
-        # Instanca pozicij figur
+        self.stanje_igre = self.STANJA["v_teku"]
         self.plosca = Plosca()
+        self.zajete_fig_beli = []
+        self.zajete_fig_crni = []
+
+    def nova_igra(self):
+        self.stanje_igre = self.STANJA["v_teku"]
+        self.plosca = Plosca()
+        self.zajete_fig_beli = []
+        self.zajete_fig_crni = []
+
+    def izvedi_potezo(self, poteza):
+        self.plosca.zabelezi_potezo(poteza)
+        if poteza.je_zajem():
+            if self.plosca.barva:
+                self.zajete_fig_beli.append(poteza.tip_zajete_fig)
+            else
+                self.zajete_fig_crni.append(poteza.tip_zajete_fig)
+        self.plosca.gen_legalne_poteze()
+        if len(self.plosca.legalne_poteze) == 0:
+            if self.plosca.check:
+                self.stanje_igre = STANJA["mat_beli" 
+                                          if not self.plosca.barva
+                                          else "mat_crni"]
+            else:
+                self.stanje_igre = STANJA["pat"]
 
     # Prejme UCI kodo poteze kot string
     # Vrne True, če je bila poteza legalna in izvedena
     # Vrne False, če je bila poteza ilegalna in se ni izvedla
-    def izvedi_potezo(uci_koda):
-        if not plosca.poteza_legalna():
+    def izvedi_potezo_uci(self, uci):
+        poteza = self.plosca.gen_pot_uci(uci)
+        if not self.plosca.je_poteza_legalna(poteza):
             return False
+        self.izvedi_potezo(poteza)
+        return True
+
+
+
         
         

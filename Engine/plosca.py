@@ -120,13 +120,6 @@ class Plosca:
     def figura_na_poz_koord(self, x, y):
         return self.figura_na_poz(koord_v_bit(x, y))
 
-    # Vrne True, če je poteza v seznamu legalnih
-    def je_poteza_legalna(self, poteza):
-        for pot in self.legalne_poteze:
-            if poteza.enaka(pot):
-                return True
-        return False
-
     # Prebere potezo in osveži podatke šahovnice
     def zabelezi_potezo(self, poteza):
         # Figura, ki se premika
@@ -297,6 +290,16 @@ class Plosca:
             poteza.tip_zajete_fig = tip_fig_dest
             poteza.poz_zajete_fig = poteza.do
         return poteza
+
+    # Vrne True, če je poteza v seznamu legalnih
+    def je_poteza_legalna(self, poteza):
+        for pot in self.legalne_poteze:
+            if poteza == pot:
+                return True
+        return False
+    
+    def gen_pot_uci(self, uci):
+        return self.prilagodi_potezo(Poteza.gen_pot_uci(uci))
 
     # Generacija premikov za drseče figure(Q, R, B). Spustimo kralja
     # To so žarki v različne smeri podane z argumenti
