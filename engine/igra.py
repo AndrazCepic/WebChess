@@ -27,28 +27,31 @@ class Igra:
         self.plosca.gen_legalne_poteze()
 
     def izvedi_potezo(self, poteza):
-        # Beleženje poteze
-        self.plosca.zabelezi_potezo(poteza)
         if poteza.je_zajem():
             if self.plosca.barva:
                 self.zajete_fig_beli.append(poteza.tip_zajete_fig)
             else:
                 self.zajete_fig_crni.append(poteza.tip_zajete_fig)
 
+        # Beleženje poteze
+        self.plosca.zabelezi_potezo(poteza)
+
         # Generacija novih legalnih potez za naslednjo potezo
         self.plosca.gen_legalne_poteze()
 
         # Nastavimo kdo je na potezi
-        self.stanje_igre = int(not self.plosca.barva)
+        self.stanje_igre = self.STANJA["beli_pot" 
+                                  if self.plosca.barva
+                                  else "crni_pot"]
 
         # Ali je igre konec
         if len(self.plosca.legalne_poteze) == 0:
             if self.plosca.check:
-                self.stanje_igre = STANJA["mat_beli" 
+                self.stanje_igre = self.STANJA["mat_beli" 
                                           if not self.plosca.barva
                                           else "mat_crni"]
             else:
-                self.stanje_igre = STANJA["pat"]
+                self.stanje_igre = self.STANJA["pat"]
 
     # Prejme UCI kodo poteze kot string
     # Vrne True, če je bila poteza legalna in izvedena
@@ -59,6 +62,12 @@ class Igra:
             return False
         self.izvedi_potezo(poteza)
         return True
+
+    def fig_v_str(self, fig):
+        for key, val in TIPI_FIGUR.items():
+            if val == fig:
+                return key
+        return None
 
     def figura_na_poz(self, x, y):
         fig = self.plosca.figura_na_poz_koord(x, y)
