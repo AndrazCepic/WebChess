@@ -11,11 +11,10 @@ PROMOCIJA = int("0b1000", 2)
 FIGURE_P = int("0b0011", 2)
 
 # String oznake za figure pri promociji
-PROM_STR = {"q": 0, "r": 1, "b": 2, "n": 3}
-
+PROM_STR = {"q" : 0, "r" : 1, "b" : 2, "n" : 3}
 
 class Poteza:
-    def __init__(self, od, do, flags=QUIET):
+    def __init__(self, od, do, flags = QUIET):
         self.od = od
         self.do = do
         self.flags = flags
@@ -47,7 +46,8 @@ class Poteza:
 
     # Enakost potez objektno
     def eq(self, pot2):
-        return (self.od == pot2.od and self.do == pot2.do)
+        return (self.od == pot2.od and
+                self.do == pot2.do)
 
     # Poteze iz UCI šahovski notaciji(string) v objekt Poteza
     @staticmethod
@@ -75,3 +75,5 @@ class Poteza:
                 return None
             return Poteza(poz_od, poz_do, b_or(PROMOCIJA, PROM_STR[uci[4]]))
         return Poteza(poz_od, poz_do)
+
+        

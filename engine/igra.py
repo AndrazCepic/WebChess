@@ -19,6 +19,13 @@ class Igra:
         self.zajete_fig_crni = []
         self.plosca.gen_legalne_poteze()
 
+    def new_game(self):
+        self.stanje_igre = self.STANJA["beli_pot"]
+        self.plosca = Plosca()
+        self.zajete_fig_beli = []
+        self.zajete_fig_crni = []
+        self.plosca.gen_legalne_poteze()
+
     def izvedi_potezo(self, poteza):
         # Beleženje poteze
         self.plosca.zabelezi_potezo(poteza)

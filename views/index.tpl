@@ -6,6 +6,13 @@
 </head>
 <body>
     <div class="header">
+        <form action="new_game" method="POST">
+            <div class="new_game_button">
+                <p>Nova Igra</p>
+                <input class="input" type="submit">
+            </div>
+        </form>
+
         % if len(debug_str) != 0:
             <h1>DEBUG: {{debug_str}}</h1>
         % end
@@ -30,10 +37,10 @@
                         fig = igra.figura_na_poz(x, y)
             %>
                 <div class="{{barva}}">
-                    <input class="square_input" type="submit" name="click" value="{{x}}{{y}}">
-                    % if fig != None:
-                        <img src="/static/{{fig}}.png"></img>
-                    % end
+                    <input class="input" type="submit" name="click" value="{{x}}{{y}}">
+                        % if fig != None:
+                            <img src="/static/{{fig}}.png"></img>
+                        % end
                 </div>
             % end
             % end
