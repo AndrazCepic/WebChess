@@ -7,14 +7,14 @@ veljavna_poteza = True
 from_sq = "00"
 to_sq = "00"
 
+
 # Debug
 debug_str = ""
 
 
 @bottle.route("/")
 def index():
-    return bottle.template(
-        "index", igra=igra, vel_pot=veljavna_poteza, debug_str=debug_str)
+    return bottle.template("index", igra=igra, vel_pot=veljavna_poteza, debug_str=debug_str)
 
 
 @bottle.post("/board_input")
@@ -25,8 +25,7 @@ def board_input():
         from_sq = sq
     else:
         to_sq = sq
-        uci = igra.v_uci(
-            int(from_sq[0]), int(from_sq[1]), int(to_sq[0]), int(to_sq[1]))
+        uci = igra.v_uci(int(from_sq[0]), int(from_sq[1]), int(to_sq[0]), int(to_sq[1]))
         veljavna_poteza = igra.izvedi_potezo_uci(uci)
 
     is_start_sq = not is_start_sq
