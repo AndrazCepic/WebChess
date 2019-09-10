@@ -1,4 +1,4 @@
-from plosca import Plosca
+from engine.plosca import Plosca
 
 class Igra:
     # Konstante za beleženje stanja igre.
@@ -28,7 +28,7 @@ class Igra:
         if poteza.je_zajem():
             if self.plosca.barva:
                 self.zajete_fig_beli.append(poteza.tip_zajete_fig)
-            else
+            else:
                 self.zajete_fig_crni.append(poteza.tip_zajete_fig)
         self.plosca.gen_legalne_poteze()
         if len(self.plosca.legalne_poteze) == 0:

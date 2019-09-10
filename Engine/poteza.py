@@ -1,4 +1,4 @@
-from bit import *
+from engine.bit import *
 
 # Maske tipov potez
 QUIET = int("0b0000", 2)

@@ -14,7 +14,7 @@ MSB = sign_v_unsign(int("0x8000000000000000", 0))
 def b_and(x, y):
     return sign_v_unsign(x & y)
 
-def b_or(x, y)
+def b_or(x, y):
     return sign_v_unsign(x | y)
 
 def b_not(x):
@@ -72,14 +72,14 @@ def koord_x(poz):
 @lru_cache(maxsize=None)
 def koord_premik(poz, x, y):
     if ((koord_x(poz) + x not in range(8)) or
-       (koord_y(poz) + y) not in range(8))):
+       (koord_y(poz) + y) not in range(8)):
        return None
     if x >= 0:
         if y >= 0:
             return sign_v_unsign((poz >> x) >> y*8)
         else:
             return sign_v_unsign((poz >> x) << (-y)*8)
-    else
+    else:
         if y >= 0:
             return sign_v_unsign((poz << (-x)) >> y*8)
         else:
@@ -100,8 +100,8 @@ def ray_cast(od, do):
         # Ni diagonala, horizontala ali pa vertikala 
         return []
 
-    dir_x = 1 if dif_x > 0 else 0 if dif_x = 0 else -1 if dif_x < 0
-    dir_y = 1 if dif_y > 0 else 0 if dif_y = 0 else -1 if dif_y < 0
+    dir_x = 1 if dif_x > 0 else 0 if dif_x == 0 else -1
+    dir_y = 1 if dif_y > 0 else 0 if dif_y == 0 else -1
     ray_poz = 0
     poz = koord_premik(od, dir_x, dir_y)
     while poz != do:

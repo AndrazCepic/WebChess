@@ -1,2 +1,3 @@
 .vscode/*
-App/__pycache__/*
+__pycache__/*
+engine/__pycache__/*

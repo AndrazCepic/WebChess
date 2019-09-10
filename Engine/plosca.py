@@ -1,5 +1,5 @@
-from poteza import *
-from bit import *
+from engine.poteza import *
+from engine.bit import *
 
 # Konstanti za beleženje, kdo je na potezi
 BELI = True
@@ -429,7 +429,7 @@ class Plosca:
         potencialne_poteze = [self.prilagodi_potezo(poteza) for poteza in potencialne_poteze]
 
         # K
-        poz_list = najdi_figure(self.figure[TIPI_FIGUR["w_k"] 
+        poz_list = najdi_figure(self.figure[TIPI_FIGUR["w_k"]] 
                                 if self.barva
                                 else self.figure[TIPI_FIGUR["b_k"]])
         poz_kralj = poz_list[0]
@@ -481,8 +481,8 @@ class Plosca:
             x2, y2 = koord_poz(poz)
             dif_x = x2 - x1
             dif_y = y2 - y1
-            dir_x = 1 if dif_x > 0 else 0 if dif_x = 0 else -1 if dif_x < 0
-            dir_y = 1 if dif_y > 0 else 0 if dif_y = 0 else -1 if dif_y < 0
+            dir_x = 1 if dif_x > 0 else 0 if dif_x == 0 else -1
+            dir_y = 1 if dif_y > 0 else 0 if dif_y == 0 else -1
             ray = self.gen_ray(poz_kralj, dir_x, dir_y)
 
             # Neveljavne poteze iz potencialnih potez

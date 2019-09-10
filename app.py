@@ -1,6 +1,10 @@
 from bottle import route, run
+from engine.igra import Igra
+
 # TEST
 stran = '<!DOCTYPE html><h1 style="">HELLO WORLD</h1>'
+
+igra = Igra()
 
 @route('/hello')
 def hello():
