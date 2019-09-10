@@ -7,8 +7,6 @@ veljavna_poteza = True
 from_sq = "00"
 to_sq = "00"
 
-print("Load ended")
-
 @bottle.route("/")
 def index():
     return bottle.template("index", igra=igra, vel_pot = veljavna_poteza)
@@ -22,7 +20,6 @@ def board_input():
         to_sq = bottle.request.forms.get("click")
         uci = igra.v_uci(from_sq, to_sq)
         veljavna_poteza = igra.izvedi_potezo_uci(uci)
-        print(veljavna_poteza)
     is_start_sq = not is_start_sq
     bottle.redirect("/")
 

@@ -7,7 +7,7 @@
 <body>
     <div class="header">
         % if not vel_pot:
-            <h1>Klik je bil na </h1>
+            <h1>Poteza ni veljavna!</h1>
         % end
     </div>
 

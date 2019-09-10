@@ -304,12 +304,12 @@ class Plosca:
 
     # Generacija premikov za drseče figure(Q, R, B). Spustimo kralja
     # To so žarki v različne smeri podane z argumenti
-    def gen_ray(self, zac_poz, dir_x, dir_y):
+    def gen_ray(self, zac_poz, dir_x, dir_y, barva):
         poz = koord_premik(zac_poz, dir_x, dir_y)
         tip_figure = self.figura_na_poz(poz)
         list_premiki = []
         # Dodamo prazne prostore
-        while tip_figure in (None, TIPI_FIGUR["w_k"], TIPI_FIGUR["b_k"]) and poz != None:
+        while tip_figure in (None, TIPI_FIGUR["b_k"] if barva else TIPI_FIGUR["w_k"]) and poz != None:
             list_premiki.append(poz)
             poz = koord_premik(zac_poz, dir_x, dir_y)
             tip_figure = self.figura_na_poz(poz)
@@ -330,7 +330,7 @@ class Plosca:
                     # Vse smeri
                     if not (x == 0 and y == 0):
                         list_potez += [Poteza(poz, poz_do) 
-                                       for poz_do in self.gen_ray(poz, x, y)]
+                                       for poz_do in self.gen_ray(poz, x, y, barva)]
         # R
         fig_indeks += 1
         poz_list = najdi_figure(self.figure[fig_indeks])
@@ -340,7 +340,7 @@ class Plosca:
                     # Samo hor. vert. smeri, torej en je 0
                     if not (x == 0 and y == 0) and (x == 0 or y == 0):
                         list_potez += [Poteza(poz, poz_do) 
-                                       for poz_do in self.gen_ray(poz, x, y)]
+                                       for poz_do in self.gen_ray(poz, x, y, barva)]
         # B
         fig_indeks += 1
         poz_list = najdi_figure(self.figure[fig_indeks])
@@ -350,7 +350,7 @@ class Plosca:
                     # Samo diag, torej oba razlicna od 0
                     if x != 0 and y != 0:
                         list_potez += [Poteza(poz, poz_do) 
-                                       for poz_do in self.gen_ray(poz, x, y)]
+                                       for poz_do in self.gen_ray(poz, x, y, barva)]
         return list_potez
 
     # Poteze skakačev
@@ -425,7 +425,7 @@ class Plosca:
         # Potencialne poteze za figure, ki niso kralj
         potencialne_poteze = self.gen_napadalne_poteze(self.barva)
         # Dodamo še gibanje kmetov, ki niso napadalne poteze
-        potencialne_poteze += self.gen_kmet_potisk(self.bela)
+        potencialne_poteze += self.gen_kmet_potisk(self.barva)
         # Prilagodimo potencialne poteze
         potencialne_poteze = [self.prilagodi_potezo(poteza) for poteza in potencialne_poteze]
 
@@ -436,7 +436,6 @@ class Plosca:
         poz_kralj = poz_list[0]
 
         # Odstranimo pinane figure
-        # TODO
         # Filtriramo napade drsečih figur
         ray_cast_nasp = 0
         for pot in nap_poteze:
@@ -451,14 +450,14 @@ class Plosca:
         # Žarek kralja v vse smeri
         ray_cast_kralj = [poz for dx in (1, 0, -1)
                               for dy in (1, 0, -1)
-                              for poz in gen_ray(poz_kralj, dx, dy)
+                              for poz in self.gen_ray(poz_kralj, dx, dy, self.barva)
                               if not (dx == 0 and dy == 0)]
         # Bitboard žarkov kralja
         ray_cast_kralj_bitb = 0
         for poz in ray_cast_kralj:
                 ray_cast_kralj_bitb = zapisi_v_bitb(ray_cast_kralj_bitb, poz)
         # Pinane figure so na pozicijah, kjer se žarka napadalnih figur in od kralja sekata
-        pin_bitb = b_and(ray_kralj_bitb, ray_cast_nasp)
+        pin_bitb = b_and(ray_cast_kralj_bitb, ray_cast_nasp)
 
         # Lahko se zgodi, da je presek dveh žarkov kar žarek, kadar je šah,
         # kar pa se lahko zgodi le natanko tedaj, ko so ta polja None,
@@ -484,7 +483,7 @@ class Plosca:
             dif_y = y2 - y1
             dir_x = 1 if dif_x > 0 else 0 if dif_x == 0 else -1
             dir_y = 1 if dif_y > 0 else 0 if dif_y == 0 else -1
-            ray = self.gen_ray(poz_kralj, dir_x, dir_y)
+            ray = self.gen_ray(poz_kralj, dir_x, dir_y, self.barva)
 
             # Neveljavne poteze iz potencialnih potez
             for pot in potencialne_poteze:                
@@ -553,7 +552,7 @@ class Plosca:
         self.check = False
 
         # Rokada - kraljeva stran
-        if self.rokada_dovoljena[0 if self.barva else 2]:
+        if self.pravice_rokade[0 if self.barva else 2]:
             poz_1 = koord_premik(poz_kralj, 1, 0)
             poz_2 = koord_premik(poz_kralj, 2, 0)
             if (self.figura_na_poz(poz_1) == None and
@@ -563,7 +562,7 @@ class Plosca:
                     not je_v_bitb(self.napadeni, poz_2)):
                     self.legalne_poteze.append(self.prilagodi_potezo(Poteza(poz_kralj, poz_2)))
         # Rokada - damina stran
-        if self.rokada_dovoljena[1 if self.barva else 3]:
+        if self.pravice_rokade[1 if self.barva else 3]:
             poz_1 = koord_premik(poz_kralj, -1, 0)
             poz_2 = koord_premik(poz_kralj, -2, 0)
             if (self.figura_na_poz(poz_1) == None and
