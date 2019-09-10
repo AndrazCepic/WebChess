@@ -295,7 +295,7 @@ class Plosca:
     # Vrne True, če je poteza v seznamu legalnih
     def je_poteza_legalna(self, poteza):
         for pot in self.legalne_poteze:
-            if poteza == pot:
+            if poteza.eq(pot):
                 return True
         return False
     
@@ -362,7 +362,9 @@ class Plosca:
                 for y in (-2, -1, 1, 2):
                     premik = koord_premik(poz, x, y)
                     # Nista oba premik za 1
-                    if not (x in (-1, 1) and y in (-1, 1)) and premik != None:
+                    if (not (x in (-1, 1) and y in (-1, 1)) and
+                        not (x in (-2, 2) and y in (-2, 2)) and 
+                        premik != None):
                         list_potez.append(Poteza(poz, premik))
         return list_potez
 
@@ -382,7 +384,7 @@ class Plosca:
             # 2 gor. tu zagotovo ni promocije
             premik = koord_premik(poz, 0, 2 if barva else -2)
             if self.figura_na_poz(premik) == None and premik != None:
-                if koord_y(premik) == (1 if self.barva else 6):
+                if koord_y(poz) == (1 if self.barva else 6):
                     list_potez.append(Poteza(poz, premik))
         return list_potez
 

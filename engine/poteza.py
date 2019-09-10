@@ -45,9 +45,8 @@ class Poteza:
         return (self.flags & FIGURE_P) + 1
 
     # Enakost potez objektno
-    def __eq__(self, pot2):
-        return (self.__class__ == pot2.__class__ and 
-                self.od == pot2.od and
+    def eq(self, pot2):
+        return (self.od == pot2.od and
                 self.do == pot2.do)
 
     # Poteze iz UCI šahovski notaciji(string) v objekt Poteza
