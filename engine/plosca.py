@@ -64,7 +64,7 @@ def najdi_figure(bitb):
     return [koord_v_bit(x, y) for y in range(8) for x in range(8) 
             if je_v_bitb(bitb, koord_v_bit(x, y))]
 
-def je_fig_drseca(self, fig):
+def je_fig_drseca(fig):
     return fig in (TIPI_FIGUR["w_q"], TIPI_FIGUR["w_r"], TIPI_FIGUR["w_b"],
                        TIPI_FIGUR["b_q"], TIPI_FIGUR["b_r"], TIPI_FIGUR["b_b"])
 
@@ -305,14 +305,17 @@ class Plosca:
     # Generacija premikov za drseče figure(Q, R, B). Spustimo kralja
     # To so žarki v različne smeri podane z argumenti
     def gen_ray(self, zac_poz, dir_x, dir_y, barva):
+        poz_p = zac_poz
         poz = koord_premik(zac_poz, dir_x, dir_y)
         tip_figure = self.figura_na_poz(poz)
         list_premiki = []
         # Dodamo prazne prostore
         while tip_figure in (None, TIPI_FIGUR["b_k"] if barva else TIPI_FIGUR["w_k"]) and poz != None:
             list_premiki.append(poz)
-            poz = koord_premik(zac_poz, dir_x, dir_y)
+            poz_p = poz
+            poz = koord_premik(poz, dir_x, dir_y)
             tip_figure = self.figura_na_poz(poz)
+
         # Dodamo zadnjega, ki je na šahovnici; ni prazen
         if poz != None:
             list_premiki.append(poz)

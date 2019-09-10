@@ -6,6 +6,9 @@
 </head>
 <body>
     <div class="header">
+        % if len(debug_str) != 0:
+            <h1>DEBUG: {{debug_str}}</h1>
+        % end
         % if not vel_pot:
             <h1>Poteza ni veljavna!</h1>
         % end
@@ -27,10 +30,10 @@
                         fig = igra.figura_na_poz(x, y)
             %>
                 <div class="{{barva}}">
-                        % if fig != None:
-                            <img src="/static/{{fig}}.png"></img>
-                        % end
                     <input class="square_input" type="submit" name="click" value="{{x}}{{y}}">
+                    % if fig != None:
+                        <img src="/static/{{fig}}.png"></img>
+                    % end
                 </div>
             % end
             % end

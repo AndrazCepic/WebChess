@@ -73,17 +73,17 @@ def koord_x(poz):
 def koord_premik(poz, x, y):
     if ((koord_x(poz) + x not in range(8)) or
        (koord_y(poz) + y) not in range(8)):
-       return None
+       return None      
     if x >= 0:
         if y >= 0:
-            return sign_v_unsign((poz >> x) >> y*8)
+            return b_shift_d(b_shift_d(poz, x), y*8)
         else:
-            return sign_v_unsign((poz >> x) << (-y)*8)
+            return b_shift_l(b_shift_d(poz, x), abs(y)*8)
     else:
         if y >= 0:
-            return sign_v_unsign((poz << (-x)) >> y*8)
+            return b_shift_d(b_shift_l(poz, abs(x)), y*8)
         else:
-            return sign_v_unsign((poz << (-x)) << (-y)*8)
+            return b_shift_l(b_shift_l(poz, abs(x)), abs(y)*8)
 
 def koord_poz(poz):
     return (koord_x(poz), koord_y(poz))

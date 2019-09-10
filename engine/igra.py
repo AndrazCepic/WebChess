@@ -60,11 +60,11 @@ class Igra:
                 return key
         return None
 
-    def v_uci(self, from_sq, to_sq):
-        uci = chr(ord("a") + int(from_sq[0]))
-        uci += from_sq[1]
-        uci += chr(ord("a") + int(to_sq[0]))
-        uci += to_sq[1]
+    def v_uci(self, x1, y1, x2, y2):
+        uci = chr(ord("a") + x1)
+        uci += str(y1)
+        uci += chr(ord("a") + x2)
+        uci += str(y2)
         return uci
 
 
