@@ -6,7 +6,9 @@
 </head>
 <body>
     <div class="header">
-        <h1>Klik je bil na ({{klik[0]}}, {{klik[1]}})</h1>
+        % if not vel_pot:
+            <h1>Klik je bil na </h1>
+        % end
     </div>
 
     <form action="/board_input" method="POST">

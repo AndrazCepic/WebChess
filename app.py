@@ -2,17 +2,28 @@ import bottle
 from engine.igra import Igra
 
 igra = Igra()
-new_board_input = True
-click_coord = "00"
+is_start_sq = True
+veljavna_poteza = True
+from_sq = "00"
+to_sq = "00"
+
+print("Load ended")
 
 @bottle.route("/")
 def index():
-    return bottle.template("index", igra=igra, klik=click_coord)
+    return bottle.template("index", igra=igra, vel_pot = veljavna_poteza)
 
 @bottle.post("/board_input")
 def board_input():
-    global click_coord
-    click_coord = bottle.request.forms.get("click")
+    global from_sq, to_sq, is_start_sq, veljavna_poteza, igra
+    if is_start_sq:
+        from_sq = bottle.request.forms.get("click")
+    else:
+        to_sq = bottle.request.forms.get("click")
+        uci = igra.v_uci(from_sq, to_sq)
+        veljavna_poteza = igra.izvedi_potezo_uci(uci)
+        print(veljavna_poteza)
+    is_start_sq = not is_start_sq
     bottle.redirect("/")
 
 @bottle.route("/static/<filename>")

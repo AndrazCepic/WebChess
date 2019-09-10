@@ -181,7 +181,7 @@ class Plosca:
             trdnjava_poz_od = koord_premik(poteza.do, 1, 0)
             trdnjava_poz_do = koord_premik(poteza.do, -1, 0)
 
-            if poteza.flags == Poteza.ROKADA_Q:
+            if poteza.flags == ROKADA_Q:
                 # Damina stran; popravek
                 # Trdnjava je 2 levo od destinacije kralja
                 # Premakne se pa 1 desno od destinacije kralja
@@ -240,7 +240,7 @@ class Plosca:
             trdnjava_poz_od = koord_premik(poteza.do, 1, 0)
             trdnjava_poz_do = koord_premik(poteza.do, -1, 0)
 
-            if poteza.flags == Poteza.ROKADA_Q:
+            if poteza.flags == ROKADA_Q:
                 # Damina stran; popravek
                 # Trdnjava je 2 levo od destinacije kralja
                 # Premakne se pa 1 desno od destinacije kralja
@@ -267,26 +267,27 @@ class Plosca:
         if tip in (TIPI_FIGUR["w_p"], TIPI_FIGUR["b_p"]):
             # Dvojni premik kmeta; razlika v y je 2
             if poteza.do in (koord_premik(poteza.od, 0, 2), koord_premik(poteza.od, 0, -2)):
-                poteza.flags = Poteza.DVOJNI_KMET
+                poteza.flags = DVOJNI_KMET
             # En Passant
             # Kmet eno nad ali pod tistim, ki se je prej premaknil za 2
-            if self.zgod_potez[-1].je_dvojni_kmet():
-                if poteza.do in (koord_premik(self.zgod_potez[-1].do, 0, -1), 
-                                 koord_premik(self.zgod_potez[-1].do, 0, 1)):
-                    poteza.flags = Poteza.EN_PASSANT
-                    poteza.poz_zajete_fig = self.zgod_potez[-1].do
-                    poteza.tip_zajete_fig = TIPI_FIGUR["b_p"] if self.barva else TIPI_FIGUR["b_p"] 
+            if len(self.zgod_potez) != 0:
+                if self.zgod_potez[-1].je_dvojni_kmet():
+                    if poteza.do in (koord_premik(self.zgod_potez[-1].do, 0, -1), 
+                                    koord_premik(self.zgod_potez[-1].do, 0, 1)):
+                        poteza.flags = EN_PASSANT
+                        poteza.poz_zajete_fig = self.zgod_potez[-1].do
+                        poteza.tip_zajete_fig = TIPI_FIGUR["b_p"] if self.barva else TIPI_FIGUR["b_p"] 
         # Kralj
         if tip in (TIPI_FIGUR["w_k"], TIPI_FIGUR["b_k"]):
             # Rokada; razlika v x je 2
             if poteza.do == koord_premik(poteza.od, 2, 0):
-                poteza.flags = Poteza.ROKADA_K
+                poteza.flags = ROKADA_K
             elif poteza.do == koord_premik(poteza.od, -2, 0):
-                poteza.flags = Poteza.ROKADA_Q
+                poteza.flags = ROKADA_Q
         # Zajemi
         tip_fig_dest = self.figura_na_poz(poteza.do)
         if tip_fig_dest != None:
-            poteza.flags = b_or(poteza.flags, Poteza.ZAJEM)
+            poteza.flags = b_or(poteza.flags, ZAJEM)
             poteza.tip_zajete_fig = tip_fig_dest
             poteza.poz_zajete_fig = poteza.do
         return poteza

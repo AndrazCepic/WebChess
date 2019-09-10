@@ -56,8 +56,8 @@ class Poteza:
         if len(uci) not in [4, 5]:
             return None
 
-        x1 = int(uci[0]) - int("a")
-        x2 = int(uci[2]) - int("a")
+        x1 = ord(uci[0]) - ord("a")
+        x2 = ord(uci[2]) - ord("a")
         y1 = int(uci[1])
         y2 = int(uci[3])
 

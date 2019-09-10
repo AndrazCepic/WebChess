@@ -6,31 +6,35 @@ class Igra:
     # MAT_BELI - Beli je zmagal igro in matiral črnega
     # MAT_CRNI - Črni je zmagal igro in matiral belega
     # PAT - Igra je končana in je izenačeno
-    STANJA = {"v_teku" : 0,
-              "mat_beli" : 1,
-              "mat_crni" : 2,
-              "pat" : 3}
+    STANJA = {"beli_pot" : 0,
+              "crni_pot" : 1,
+              "mat_beli" : 2,
+              "mat_crni" : 3,
+              "pat" : 4}
 
     def __init__(self):
-        self.stanje_igre = self.STANJA["v_teku"]
+        self.stanje_igre = self.STANJA["beli_pot"]
         self.plosca = Plosca()
         self.zajete_fig_beli = []
         self.zajete_fig_crni = []
-
-    def nova_igra(self):
-        self.stanje_igre = self.STANJA["v_teku"]
-        self.plosca = Plosca()
-        self.zajete_fig_beli = []
-        self.zajete_fig_crni = []
+        self.plosca.gen_legalne_poteze()
 
     def izvedi_potezo(self, poteza):
+        # Beleženje poteze
         self.plosca.zabelezi_potezo(poteza)
         if poteza.je_zajem():
             if self.plosca.barva:
                 self.zajete_fig_beli.append(poteza.tip_zajete_fig)
             else:
                 self.zajete_fig_crni.append(poteza.tip_zajete_fig)
+
+        # Generacija novih legalnih potez za naslednjo potezo
         self.plosca.gen_legalne_poteze()
+
+        # Nastavimo kdo je na potezi
+        self.stanje_igre = int(not self.plosca.barva)
+
+        # Ali je igre konec
         if len(self.plosca.legalne_poteze) == 0:
             if self.plosca.check:
                 self.stanje_igre = STANJA["mat_beli" 
@@ -56,9 +60,12 @@ class Igra:
                 return key
         return None
 
-    def v_uci(self, x1, y1, x2, y2):
-        uci = ""
-        
+    def v_uci(self, from_sq, to_sq):
+        uci = chr(ord("a") + int(from_sq[0]))
+        uci += from_sq[1]
+        uci += chr(ord("a") + int(to_sq[0]))
+        uci += to_sq[1]
+        return uci
 
 
         
