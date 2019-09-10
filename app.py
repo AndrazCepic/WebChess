@@ -1,12 +1,22 @@
-from bottle import route, run, template
+import bottle
 from engine.igra import Igra
 
-# TEST
-stran = '<!DOCTYPE html><h1 style="">HELLO WORLD</h1>'
 igra = Igra()
+new_board_input = True
+click_coord = "00"
 
-@route('/')
+@bottle.route("/")
 def index():
-    return template("index")
+    return bottle.template("index", igra=igra, klik=click_coord)
 
-run(host='localhost', port=8080, debug=True, reloader=True)
+@bottle.post("/board_input")
+def board_input():
+    global click_coord
+    click_coord = bottle.request.forms.get("click")
+    bottle.redirect("/")
+
+@bottle.route("/static/<filename>")
+def server_static(filename):
+    return bottle.static_file(filename, root="./res")
+
+bottle.run(host='localhost', port=8080, debug=True, reloader=True)

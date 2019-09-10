@@ -1,0 +1,39 @@
+.board {
+    width: 768px;
+    height: 768px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.square_b {
+    width: 96px;
+    height: 96px;
+    border: none;
+    padding: 0;
+    margin: 0;
+    float: left;
+    background-color: 	#769656;
+}
+
+.square_w {
+    width: 96px;
+    height: 96px;
+    border: none;
+    padding: 0;
+    margin: 0;
+    float: left;
+    background-color: 	#eeeed2;
+}
+
+.square_input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: none;
+    padding: 0;
+    margin: 0;
+    float: left;
+    background: none;
+    color: rgba(0, 0, 0, 0)
+}
+

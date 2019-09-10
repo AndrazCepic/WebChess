@@ -1,4 +1,4 @@
-from engine.plosca import Plosca
+from engine.plosca import Plosca, TIPI_FIGUR
 
 class Igra:
     # Konstante za beleženje stanja igre.
@@ -49,6 +49,16 @@ class Igra:
         self.izvedi_potezo(poteza)
         return True
 
+    def figura_na_poz(self, x, y):
+        fig = self.plosca.figura_na_poz_koord(x, y)
+        for key, val in TIPI_FIGUR.items():
+            if val == fig:
+                return key
+        return None
+
+    def v_uci(self, x1, y1, x2, y2):
+        uci = ""
+        
 
 
         
