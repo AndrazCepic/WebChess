@@ -3,8 +3,8 @@ from engine.igra import Igra
 
 igra = Igra()
 is_start_sq = True
-from_sq = "00"
-to_sq = "00"
+from_sq = ""
+to_sq = ""
 promotion_w = False
 promotion_b = False
 prom_uci = None
@@ -17,7 +17,9 @@ debug_str = ""
 def index():
     return bottle.template("index", igra=igra, 
                            prom_w=promotion_w, 
-                           prom_b=promotion_b)
+                           prom_b=promotion_b,
+                           from_sq=from_sq,
+                           is_start_sq=is_start_sq)
 
 
 @bottle.post("/board_input")
@@ -29,6 +31,8 @@ def board_input():
     else:
         to_sq = sq
         uci = igra.v_uci(int(from_sq[0]), int(from_sq[1]), int(to_sq[0]), int(to_sq[1]))
+        from_sq = ""
+        to_sq = ""
         poteza = igra.plosca.gen_pot_uci(uci)
         if igra.plosca.je_poteza_legalna(poteza):
             if  poteza.je_promocija():

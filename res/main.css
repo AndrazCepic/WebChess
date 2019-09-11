@@ -39,7 +39,7 @@
     float: left;
 }
 
-.square_b {
+.square_b_0 {
     width: 64px;
     height: 64px;
     border: none;
@@ -49,7 +49,18 @@
     background-color: 	#769656;
 }
 
-.square_w {
+.square_b_1 {
+    box-sizing: border-box;
+    width: 64px;
+    height: 64px;
+    border: none;
+    padding: 0;
+    margin: 0;
+    float: left;
+    background-color: 	#5f803f;
+}
+
+.square_w_0 {
     width: 64px;
     height: 64px;
     border: none;
@@ -59,9 +70,19 @@
     background-color: 	#eeeed2;
 }
 
+.square_w_1 {
+    width: 64px;
+    height: 64px;
+    border:none;
+    padding: 0;
+    margin: 0;
+    float: left;
+    background-color: #ececa5;
+}
+
 .info {
     width:100%;
-    margin-top: 3%;
+    margin-top: 2%;
 }
 
 .info p{
@@ -70,16 +91,31 @@
     font-size: 200%;
 }
 
-.input {
+.input_0 {
+    box-sizing: content-box;
     position: absolute;
-    width: 100%;
-    height: 100%;
+    width: 64px;
+    height: 64px;
     border: none;
     padding: 0;
     margin: 0;
     float: left;
     background: none;
     color: rgba(0, 0, 0, 0);
+}
+
+.input_1 {
+    box-sizing: content-box;
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    border: none;
+    padding: 0;
+    margin: 0;
+    float: left;
+    background: none;
+    color: rgba(0, 0, 0, 0);
+    cursor: pointer;
 }
 
 #new_game_button {
@@ -94,6 +130,7 @@
     border: none;
     margin-left: auto;
     margin-right: auto;
+    margin-top: 20px;
 }
 
 .promotion{
@@ -130,6 +167,10 @@
     margin: 0;
     float: left;
     background: none;
+}
+
+img :hover{
+    cursor: pointer;
 }
 
 #new_game form :hover{

@@ -33,15 +33,15 @@
     <form action="promotion" method="POST">
     <div class="promotion">
         <div class="piece">
-            <input class="input" type="submit" name="prom_fig" value="q">
+            <input class="input_1" type="submit" name="prom_fig" value="q">
             <img src="/static/w_q.png"></img>
         </div>
         <div class="piece">
-            <input class="input" type="submit" name="prom_fig" value="r">
+            <input class="input_1" type="submit" name="prom_fig" value="r">
             <img src="/static/w_r.png"></img>
         </div>
         <div class="piece">
-            <input class="input" type="submit" name="prom_fig" value="b">
+            <input class="input_1" type="submit" name="prom_fig" value="b">
             <img src="/static/w_b.png"></img>
         </div>
     </div>
@@ -74,12 +74,17 @@
                             end
 
                             fig = igra.figura_na_poz(x, y)
+                            is_fig = int(fig != None)
+                            is_start = 0
+                            if from_sq != "":
+                                is_start = int(x == int(from_sq[0]) and y == int(from_sq[1]))
+                            end
                 %>
-                    <div class="{{barva}}">
+                    <div class="{{barva}}_{{is_start}}">
                             % if not prom_w and not prom_b:
-                                <input class="input" type="submit" name="click" value="{{x}}{{y}}">
+                                <input class="input_{{is_fig}}" type="submit" name="click" value="{{x}}{{y}}">
                             % end
-                            % if fig != None:
+                            % if is_fig:
                                 <img src="/static/{{fig}}.png"></img>
                             % end
                     </div>

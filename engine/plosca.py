@@ -562,7 +562,6 @@ class Plosca:
                             and self.figura_na_poz(premik) not in range(
                                 0 if self.barva else 6, 6
                                 if self.barva else 12)):
-                        print("OK: " + str(koord_poz(premik)))
                         self.legalne_poteze.append(
                             self.prilagodi_potezo(Poteza(poz_kralj, premik)))
         # Ali je šah. Shranimo napadalce polja kralja
