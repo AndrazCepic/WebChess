@@ -3,7 +3,6 @@ from engine.igra import Igra
 
 igra = Igra()
 is_start_sq = True
-veljavna_poteza = True
 from_sq = "00"
 to_sq = "00"
 promotion_w = False
@@ -16,7 +15,9 @@ debug_str = ""
 
 @bottle.route("/")
 def index():
-    return bottle.template("index", igra=igra, prom_w=promotion_w, prom_b=promotion_b)
+    return bottle.template("index", igra=igra, 
+                           prom_w=promotion_w, 
+                           prom_b=promotion_b)
 
 
 @bottle.post("/board_input")
@@ -43,9 +44,12 @@ def board_input():
 @bottle.post("/new_game")
 def new_game():
     global is_start_sq, veljavna_poteza
-    veljavna_poteza = True
+    is_start_sq = True
+    from_sq = "00"
+    to_sq = "00"
     igra.new_game()
     bottle.redirect("/")
+
 
 @bottle.post("/promotion")
 def promotion():

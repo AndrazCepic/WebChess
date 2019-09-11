@@ -1,4 +1,5 @@
-from engine.plosca import Plosca, TIPI_FIGUR
+from engine.plosca import *
+from engine.bit import *
 
 class Igra:
     # Konstante za beleženje stanja igre.
@@ -69,11 +70,19 @@ class Igra:
 
     def v_uci(self, x1, y1, x2, y2):
         uci = chr(ord("a") + x1)
-        uci += str(y1)
+        uci += str(y1 + 1)
         uci += chr(ord("a") + x2)
-        uci += str(y2)
+        uci += str(y2 + 1)
         return uci
 
 
-        
-        
+    def izpisi_legalne_poteze(self):
+        for pot in self.plosca.legalne_poteze:
+            print("Figura: " + self.figura_na_poz(koord_x(pot.od), koord_y(pot.od)) + 
+                  " od (" + str(koord_x(pot.od)) + ", " + str(koord_y(pot.od)) + ") " + 
+                  "do (" + str(koord_x(pot.do)) + ", " + str(koord_y(pot.do)) + ")")        
+    
+
+    def izpisi_napadene_poz(self):
+        for poz in najdi_figure(self.plosca.napadeni):
+            print(str(koord_poz(poz)))

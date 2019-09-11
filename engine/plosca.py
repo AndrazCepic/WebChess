@@ -298,14 +298,13 @@ class Plosca:
             # Kmet eno nad ali pod tistim, ki se je prej premaknil za 2
             if len(self.zgod_potez) != 0:
                 if self.zgod_potez[-1].je_dvojni_kmet():
-                    if poteza.do in (koord_premik(self.zgod_potez[-1].do, 0,
-                                                  -1),
-                                     koord_premik(self.zgod_potez[-1].do, 0,
-                                                  1)):
+                    if poteza.do == (koord_premik(self.zgod_potez[-1].do, 0, 1)
+                                     if self.barva else
+                                     koord_premik(self.zgod_potez[-1].do, 0, -1)):
                         poteza.flags = EN_PASSANT
                         poteza.poz_zajete_fig = self.zgod_potez[-1].do
                         poteza.tip_zajete_fig = TIPI_FIGUR[
-                            "b_p"] if self.barva else TIPI_FIGUR["b_p"]
+                            "b_p"] if self.barva else TIPI_FIGUR["w_p"]
         # Kralj
         if tip in (TIPI_FIGUR["w_k"], TIPI_FIGUR["b_k"]):
             # Rokada; razlika v x je 2
@@ -331,10 +330,9 @@ class Plosca:
     def gen_pot_uci(self, uci):
         return self.prilagodi_potezo(Poteza.gen_pot_uci(uci))
 
-    # Generacija premikov za drseče figure(Q, R, B). Spustimo kralja
     # To so žarki v različne smeri podane z argumenti
+    # Spustimo nasprotnikovega kralja, saj se ne sme premikati po žarku
     def gen_ray(self, zac_poz, dir_x, dir_y, barva):
-        poz_p = zac_poz
         poz = koord_premik(zac_poz, dir_x, dir_y)
         tip_figure = self.figura_na_poz(poz)
         list_premiki = []
@@ -342,10 +340,8 @@ class Plosca:
         while tip_figure in (None, TIPI_FIGUR["b_k"]
                              if barva else TIPI_FIGUR["w_k"]) and poz != None:
             list_premiki.append(poz)
-            poz_p = poz
             poz = koord_premik(poz, dir_x, dir_y)
             tip_figure = self.figura_na_poz(poz)
-
         # Dodamo zadnjega, ki je na šahovnici; ni prazen
         if poz != None:
             list_premiki.append(poz)
@@ -460,6 +456,7 @@ class Plosca:
     # Generacija legalnih potez
     def gen_legalne_poteze(self):
         self.legalne_poteze = []
+        # Napadalne poteze nasprotnika
         nap_poteze = self.gen_napadalne_poteze(not self.barva)
         # Zravnamo ta seznam napadenih pozicij v bitboard
         self.napadeni = 0
@@ -485,11 +482,8 @@ class Plosca:
         ray_cast_nasp = 0
         for pot in nap_poteze:
             # Je drseča, ki napada
-            if self.figura_na_poz(pot.od) in range(
-                    TIPI_FIGUR["b_q"]
-                    if self.barva else TIPI_FIGUR["w_q"], TIPI_FIGUR["b_b"]
-                    if self.barva else TIPI_FIGUR["w_b"]):
-                # Ali je med kraljem in to figuro
+            if je_fig_drseca(self.figura_na_poz(pot.od)):
+                # Ali je napadeno polje v žarku med kraljem in to figuro
                 if je_v_bitb(ray_cast(pot.od, poz_kralj), pot.do):
                     ray_cast_nasp = zapisi_v_bitb(ray_cast_nasp, pot.do)
         # Žarek kralja v vse smeri
@@ -529,8 +523,8 @@ class Plosca:
             x2, y2 = koord_poz(poz)
             dif_x = x2 - x1
             dif_y = y2 - y1
-            dir_x = 1 if dif_x > 0 else 0 if dif_x == 0 else -1
-            dir_y = 1 if dif_y > 0 else 0 if dif_y == 0 else -1
+            dir_x = 1 if dif_x > 0 else (0 if dif_x == 0 else -1)
+            dir_y = 1 if dif_y > 0 else (0 if dif_y == 0 else -1)
             ray = self.gen_ray(poz_kralj, dir_x, dir_y, self.barva)
 
             # Neveljavne poteze iz potencialnih potez
@@ -566,8 +560,9 @@ class Plosca:
                     # Legalnost
                     if (not je_v_bitb(self.napadeni, premik)
                             and self.figura_na_poz(premik) not in range(
-                                1 if self.barva else 7, 6
+                                0 if self.barva else 6, 6
                                 if self.barva else 12)):
+                        print("OK: " + str(koord_poz(premik)))
                         self.legalne_poteze.append(
                             self.prilagodi_potezo(Poteza(poz_kralj, premik)))
         # Ali je šah. Shranimo napadalce polja kralja
@@ -593,7 +588,10 @@ class Plosca:
             # Dodamo poteze, ki zajamejo napadalno figuro,
             # ali pa blokirajo napad, če je napadalna drseča
             for poteza in potencialne_poteze:
-                # TODO: PINANE FIGURE NISO VELJAVNE!!!
+                if poteza.od == poz_kralj:
+                    # Kralja smo že obravnavali
+                    continue
+
                 if poteza.je_zajem():
                     if poteza.poz_zajete_fig == poz_napad:
                         self.legalne_poteze.append(poteza)

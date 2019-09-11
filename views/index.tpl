@@ -16,13 +16,13 @@
             <p>Izberi promocijsko figuro!</p>
         % else:
             % if igra.stanje_igre == igra.STANJA["beli_pot"]:
-                <p>Bel je na potezi!</p>
+                <p>Beli je na potezi!</p>
             % elif igra.stanje_igre == igra.STANJA["crni_pot"]:
-                <p>Črn je na potezi!</p>
+                <p>Črni je na potezi!</p>
             % elif igra.stanje_igre == igra.STANJA["mat_beli"]:
-                <p>Bel je zmagal!</p>
+                <p>Beli je zmagal!</p>
             % elif igra.stanje_igre == igra.STANJA["mat_crni"]:
-                <p>Črn je zmagal!</p>
+                <p>Črni je zmagal!</p>
             % elif igra.stanje_igre == igra.STANJA["pat"]:
                 <p>Igra je končana neodločeno!</p>
             % end

@@ -53,13 +53,13 @@ class Poteza:
     @staticmethod
     def gen_pot_uci(uci):
         # Preverimo dolžino
-        if len(uci) not in [4, 5]:
+        if len(uci) not in (4, 5):
             return None
 
-        x1 = ord(uci[0]) - ord("a")
-        x2 = ord(uci[2]) - ord("a")
-        y1 = int(uci[1])
-        y2 = int(uci[3])
+        x1 = (ord(uci[0]) - ord("a"))
+        x2 = (ord(uci[2]) - ord("a"))
+        y1 = int(uci[1]) - 1
+        y2 = int(uci[3]) - 1
 
         # Preverimo koordinate
         if not all(x in range(8) for x in [x1, x2, y1, y2]):
