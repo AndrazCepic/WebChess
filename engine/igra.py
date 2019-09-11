@@ -19,6 +19,7 @@ class Igra:
         self.zajete_fig_crni = []
         self.plosca.gen_legalne_poteze()
 
+
     def new_game(self):
         self.stanje_igre = self.STANJA["beli_pot"]
         self.plosca = Plosca()
@@ -26,24 +27,21 @@ class Igra:
         self.zajete_fig_crni = []
         self.plosca.gen_legalne_poteze()
 
+
     def izvedi_potezo(self, poteza):
         if poteza.je_zajem():
             if self.plosca.barva:
                 self.zajete_fig_beli.append(poteza.tip_zajete_fig)
             else:
                 self.zajete_fig_crni.append(poteza.tip_zajete_fig)
-
         # Beleženje poteze
         self.plosca.zabelezi_potezo(poteza)
-
         # Generacija novih legalnih potez za naslednjo potezo
         self.plosca.gen_legalne_poteze()
-
         # Nastavimo kdo je na potezi
         self.stanje_igre = self.STANJA["beli_pot" 
                                   if self.plosca.barva
                                   else "crni_pot"]
-
         # Ali je igre konec
         if len(self.plosca.legalne_poteze) == 0:
             if self.plosca.check:
@@ -53,15 +51,6 @@ class Igra:
             else:
                 self.stanje_igre = self.STANJA["pat"]
 
-    # Prejme UCI kodo poteze kot string
-    # Vrne True, če je bila poteza legalna in izvedena
-    # Vrne False, če je bila poteza ilegalna in se ni izvedla
-    def izvedi_potezo_uci(self, uci):
-        poteza = self.plosca.gen_pot_uci(uci)
-        if not self.plosca.je_poteza_legalna(poteza):
-            return False
-        self.izvedi_potezo(poteza)
-        return True
 
     def fig_v_str(self, fig):
         for key, val in TIPI_FIGUR.items():
@@ -69,12 +58,14 @@ class Igra:
                 return key
         return None
 
+
     def figura_na_poz(self, x, y):
         fig = self.plosca.figura_na_poz_koord(x, y)
         for key, val in TIPI_FIGUR.items():
             if val == fig:
                 return key
         return None
+
 
     def v_uci(self, x1, y1, x2, y2):
         uci = chr(ord("a") + x1)

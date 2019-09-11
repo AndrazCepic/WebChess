@@ -186,12 +186,12 @@ class Plosca:
             ]
 
         if poteza.je_promocija():
-            figura_prom = poteza.figura_prom() + int(self.barva == CRNI) * 6
+            figura_prom = poteza.figura_promocije() + int(self.barva == CRNI) * 6
             self.figure = [
                 b_or(self.figure[i], poteza.do)
                 if i == figura_prom else b_and(self.figure[i],
-                                               b_not(pozicija.od))
-                if je_v_bitb(self.figure[i], pozicija.od) else self.figure[i]
+                                               b_not(poteza.od))
+                if je_v_bitb(self.figure[i], poteza.od) else self.figure[i]
                 for i in range(12)
             ]
         elif poteza.je_rokada():
@@ -288,7 +288,8 @@ class Plosca:
         # Kmet
         if tip in (TIPI_FIGUR["w_p"], TIPI_FIGUR["b_p"]):
             # Promocija
-
+            if koord_y(poteza.do) in (0, 7):
+                poteza.flags = b_or(poteza.flags, PROMOCIJA)
             # Dvojni premik kmeta; razlika v y je 2
             if poteza.do in (koord_premik(poteza.od, 0, 2),
                              koord_premik(poteza.od, 0, -2)):
