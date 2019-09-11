@@ -5,27 +5,29 @@
     <link rel="stylesheet" href="/static/main.css">
 </head>
 <body>
+    <div id="new_game">
+        <form action="new_game" method="POST">
+                <input id="new_game_button" type="submit" name="new_game" value="Nova Igra">
+        </form>
+    </div>
+    
     <div class="info">
-        % if igra.stanje_igre == igra.STANJA["beli_pot"]:
-            <p>Bel je na potezi</p>
-        % elif igra.stanje_igre == igra.STANJA["crni_pot"]:
-            <p>Črn je na potezi</p>
-        % elif igra.stanje_igre == igra.STANJA["mat_beli"]:
-            <p>Bel je zmagal!</p>
-        % elif igra.stanje_igre == igra.STANJA["mat_crni"]:
-            <p>Črn je zmagal!</p>
-        % elif igra.stanje_igre == igra.STANJA["pat"]:
-            <p>Igra je končana neodločeno!</p>
-        % end
-
         % if prom_w or prom_b:
             <p>Izberi promocijsko figuro!</p>
+        % else:
+            % if igra.stanje_igre == igra.STANJA["beli_pot"]:
+                <p>Bel je na potezi!</p>
+            % elif igra.stanje_igre == igra.STANJA["crni_pot"]:
+                <p>Črn je na potezi!</p>
+            % elif igra.stanje_igre == igra.STANJA["mat_beli"]:
+                <p>Bel je zmagal!</p>
+            % elif igra.stanje_igre == igra.STANJA["mat_crni"]:
+                <p>Črn je zmagal!</p>
+            % elif igra.stanje_igre == igra.STANJA["pat"]:
+                <p>Igra je končana neodločeno!</p>
+            % end
         % end
     </div>
-
-    <form action="new_game" method="POST">
-            <input id="new_game_button" type="submit" name="new_game" value="Nova Igra">
-    </form>
 
     % if prom_w:
     <form action="promotion" method="POST">

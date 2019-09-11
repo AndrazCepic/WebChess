@@ -60,14 +60,14 @@
 }
 
 .info {
-    margin-left: auto;
-    margin-right: auto;
+    width:100%;
+    margin-top: 3%;
 }
 
 .info p{
     text-align: center;
-    color: #000000;
-    font-size: 300%;
+    color: #1a1a1a;
+    font-size: 200%;
 }
 
 .input {
@@ -86,13 +86,14 @@
     width: 200px;
     height: 60px;
     background-color: #e7e7e7;
-    float: left;
     display: flex;
     text-align: center;
     font-size: 150%;
     color: rgb(20, 20, 20);
     cursor: pointer;
     border: none;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .promotion{
@@ -129,4 +130,8 @@
     margin: 0;
     float: left;
     background: none;
+}
+
+#new_game form :hover{
+    background-color: #bbbbbb;
 }
